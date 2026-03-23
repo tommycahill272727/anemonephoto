@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Ambspottery</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@200;300;400&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:        #1e3220;
+  --surface:   rgba(22,38,22,0.82);
+  --surface2:  rgba(18,32,18,0.68);
+  --moss-d:    #162a14;
+  --moss:      #2a4a22;
+  --moss-m:    #3a6030;
+  --moss-l:    #5a8845;
+  --lichen:    #8ab870;
+  --lichen-l:  #b0d090;
+  --stone-g:   #4e6845;
+  --cream:     #e2eed8;
+  --cream2:    #cce0b8;
+  --text:      #ddeec8;
+  --text2:     #a8cc88;
+  --font-serif:'Cormorant Garamond',serif;
+  --font-sans:'Jost',sans-serif;
+}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-sans);font-weight:300;
+  -webkit-font-smoothing:antialiased;min-height:100vh;
+}
+
+#bg-canvas{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;}
+#grain{
+  position:fixed;inset:0;z-index:1;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='280' height='280'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.78' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='280' height='280' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity:0.032;mix-blend-mode:overlay;
+}
+#vignette{
+  position:fixed;inset:0;z-index:2;pointer-events:none;
+  background:radial-gradient(ellipse 95% 95% at 50% 50%,transparent 45%,rgba(12,22,12,0.55) 100%);
+}
+nav,main,footer{position:relative;z-index:10;}
+
+/* NAV */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:500;
+  background:rgba(20,34,18,0.9);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(130,185,100,0.18);
+  padding:0 3rem;display:flex;justify-content:space-between;align-items:center;height:64px;
+}
+.nav-logo{
+  font-family:var(--font-serif);font-size:1.4rem;font-weight:400;
+  color:var(--cream);text-decoration:none;letter-spacing:0.06em;
+}
+.nav-logo em{font-style:italic;color:var(--lichen-l);}
+.nav-tabs{display:flex;list-style:none;}
+.nav-tabs a{
+  font-size:0.58rem;letter-spacing:0.22em;text-transform:uppercase;
+  color:rgba(180,220,150,0.4);text-decoration:none;
+  padding:0.5rem 1.2rem;position:relative;transition:color 0.25s;display:block;cursor:pointer;
+}
+.nav-tabs a::after{
+  content:'';position:absolute;bottom:-1px;left:1.2rem;right:1.2rem;
+  height:1px;background:var(--lichen);
+  transform:scaleX(0);transform-origin:left;
+  transition:transform 0.3s cubic-bezier(0.23,1,0.32,1);
+}
+.nav-tabs a:hover{color:var(--cream);}
+.nav-tabs a:hover::after,.nav-tabs a.active::after{transform:scaleX(1);}
+.nav-tabs a.active{color:var(--cream);}
+
+.page{display:none;padding-top:64px;}
+.page.active{display:block;}
+
+/* BUTTONS */
+.btn{
+  font-size:0.54rem;letter-spacing:0.2em;text-transform:uppercase;
+  color:var(--moss-d);background:var(--lichen-l);
+  padding:0.9rem 2rem;text-decoration:none;border:none;cursor:pointer;
+  font-family:var(--font-sans);font-weight:400;
+  transition:background 0.3s;display:inline-block;
+}
+.btn:hover{background:var(--lichen);}
+.btn-ghost{
+  font-size:0.54rem;letter-spacing:0.2em;text-transform:uppercase;
+  color:var(--lichen-l);background:transparent;
+  padding:0.88rem 2rem;text-decoration:none;cursor:pointer;
+  border:1px solid rgba(140,190,100,0.4);font-family:var(--font-sans);font-weight:300;
+  transition:border-color 0.3s,color 0.3s;display:inline-block;
+}
+.btn-ghost:hover{border-color:var(--lichen);color:var(--cream);}
+
+/* ═══ HOME ═══ */
+.hero{
+  min-height:calc(100vh - 64px);
+  display:grid;grid-template-columns:1fr 1fr;
+}
+.hero-left{
+  display:flex;flex-direction:column;justify-content:center;
+  padding:6rem 4rem 6rem 3rem;
+  background:rgba(16,28,14,0.68);
+  backdrop-filter:blur(4px);
+  border-right:1px solid rgba(130,185,100,0.12);
+}
+.hero-eyebrow{
+  font-size:0.54rem;letter-spacing:0.35em;text-transform:uppercase;
+  color:var(--lichen);margin-bottom:1.75rem;
+  display:flex;align-items:center;gap:0.75rem;
+}
+.hero-eyebrow::before{content:'';display:block;width:24px;height:1px;background:var(--lichen);}
+.hero-h1{
+  font-family:var(--font-serif);font-weight:300;
+  font-size:clamp(3rem,5.5vw,5rem);line-height:1.05;
+  color:var(--cream);margin-bottom:1.75rem;
+}
+.hero-h1 em{font-style:italic;color:var(--lichen-l);}
+.hero-p{font-size:0.78rem;line-height:2.1;color:rgba(180,220,150,0.7);max-width:360px;margin-bottom:2.5rem;}
+.hero-btns{display:flex;gap:1rem;}
+.hero-right{position:relative;overflow:hidden;background:rgba(20,34,18,0.4);}
+.hero-img{width:100%;height:100%;object-fit:cover;display:block;}
+.hero-ph{width:100%;height:100%;min-height:500px;display:flex;align-items:center;justify-content:center;}
+.ph-txt{font-family:var(--font-serif);font-style:italic;font-size:0.88rem;color:rgba(180,220,150,0.22);}
+
+.hr-line{height:1px;background:linear-gradient(to right,transparent,rgba(130,185,100,0.22) 20%,rgba(130,185,100,0.22) 80%,transparent);}
+
+.about-band{
+  padding:5rem 3rem;
+  display:grid;grid-template-columns:1fr 1px 1fr;gap:3.5rem;
+}
+.about-div{background:rgba(130,185,100,0.14);}
+.ab-h2{
+  font-family:var(--font-serif);font-weight:300;
+  font-size:clamp(2rem,3.8vw,3rem);line-height:1.1;color:var(--cream);margin-bottom:1.5rem;
+}
+.ab-h2 em{font-style:italic;color:var(--lichen-l);}
+.ab-p{font-size:0.78rem;line-height:2.1;color:rgba(180,220,150,0.65);margin-bottom:1.2rem;}
+
+.featured-sec{padding:0 3rem 6rem;}
+.sec-label{
+  font-size:0.52rem;letter-spacing:0.35em;text-transform:uppercase;
+  color:var(--lichen);margin-bottom:2.5rem;
+  display:flex;align-items:center;gap:0.75rem;
+}
+.sec-label::before{content:'';display:block;width:16px;height:1px;background:var(--lichen);}
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;}
+.feat-item{cursor:pointer;background:rgba(16,28,14,0.5);}
+.feat-ph{aspect-ratio:3/4;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+.feat-ph img,.feat-ph-in{width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);}
+.feat-ph-in{display:flex;align-items:center;justify-content:center;}
+.feat-item:hover .feat-ph img,.feat-item:hover .feat-ph-in{transform:scale(1.04);}
+.fp1{background:linear-gradient(155deg,#243c1c,#3a5e28,#2c4c20);}
+.fp2{background:linear-gradient(145deg,#1e3418,#304e22,#263e1c);}
+.fp3{background:linear-gradient(135deg,#283e1e,#3c6028,#2e4e22);}
+.feat-meta{padding:0.9rem 0.75rem 0.75rem;background:rgba(14,24,12,0.7);}
+.feat-name{font-family:var(--font-serif);font-size:1rem;color:var(--cream);margin-bottom:0.18rem;}
+.feat-price{font-size:0.66rem;color:var(--lichen);letter-spacing:0.08em;}
+
+/* ═══ CATALOG ═══ */
+.cat-hero{
+  padding:4rem 3rem 2rem;border-bottom:1px solid rgba(130,185,100,0.14);
+  display:flex;justify-content:space-between;align-items:flex-end;gap:2rem;
+  background:rgba(14,24,12,0.65);backdrop-filter:blur(3px);
+}
+.cat-h1{font-family:var(--font-serif);font-weight:300;font-size:clamp(2.5rem,5vw,4rem);color:var(--cream);line-height:1;}
+.cat-h1 em{font-style:italic;color:var(--lichen-l);}
+.cat-intro{font-size:0.74rem;color:rgba(180,220,150,0.58);max-width:310px;line-height:1.9;}
+.filter-bar{
+  padding:1.25rem 3rem;border-bottom:1px solid rgba(130,185,100,0.1);
+  display:flex;gap:0.4rem;background:rgba(12,20,10,0.75);
+}
+.fb{
+  font-size:0.52rem;letter-spacing:0.18em;text-transform:uppercase;
+  color:rgba(180,220,150,0.42);background:none;border:1px solid transparent;
+  padding:0.42rem 0.95rem;cursor:pointer;transition:all 0.2s;
+  font-family:var(--font-sans);font-weight:300;
+}
+.fb:hover,.fb.on{border-color:rgba(130,185,100,0.3);color:var(--cream2);background:rgba(50,90,35,0.35);}
+.cat-grid{
+  padding:2.5rem 3rem 5rem;
+  display:grid;grid-template-columns:repeat(4,1fr);gap:2.5rem 2rem;
+}
+.cat-item{cursor:pointer;}
+.cat-ph{aspect-ratio:1;overflow:hidden;margin-bottom:0.9rem;}
+.cat-ph img,.cat-ph-in{width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.65s cubic-bezier(0.23,1,0.32,1);}
+.cat-ph-in{display:flex;align-items:center;justify-content:center;}
+.cat-item:hover .cat-ph img,.cat-item:hover .cat-ph-in{transform:scale(1.05);}
+.cp1{background:linear-gradient(145deg,#2a4420,#3e6030);}
+.cp2{background:linear-gradient(155deg,#243a1c,#38562a);}
+.cp3{background:linear-gradient(135deg,#2c461e,#405e2e);}
+.cp4{background:linear-gradient(145deg,#263e1a,#3a5828);}
+.cp5{background:linear-gradient(140deg,#2e4822,#426232);}
+.cp6{background:linear-gradient(150deg,#283e1c,#3c5c2a);}
+.cp7{background:linear-gradient(130deg,#243a1a,#385628);}
+.cp8{background:linear-gradient(145deg,#2c461e,#406030);}
+.cat-name{font-family:var(--font-serif);font-size:0.95rem;color:var(--cream);margin-bottom:0.18rem;}
+.cat-sub{font-size:0.56rem;color:var(--lichen);letter-spacing:0.08em;margin-bottom:0.35rem;}
+.cat-price{font-size:0.72rem;color:rgba(180,220,150,0.6);}
+
+/* ═══ CONTACT ═══ */
+.contact-wrap{
+  max-width:860px;margin:0 auto;
+  padding:5rem 3rem 6rem;
+  display:grid;grid-template-columns:1fr 1fr;gap:5rem;
+}
+.con-h1{
+  font-family:var(--font-serif);font-weight:300;
+  font-size:clamp(2.5rem,5vw,3.8rem);color:var(--cream);line-height:1.05;margin-bottom:1.5rem;
+}
+.con-h1 em{font-style:italic;color:var(--lichen-l);}
+.con-p{font-size:0.76rem;line-height:2.1;color:rgba(180,220,150,0.6);margin-bottom:2rem;}
+.con-details{display:flex;flex-direction:column;gap:1.2rem;margin-bottom:2rem;}
+.cd{display:flex;flex-direction:column;gap:0.18rem;}
+.cd-l{font-size:0.46rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--lichen);}
+.cd-v{font-size:0.78rem;color:rgba(180,220,150,0.62);font-style:italic;font-family:var(--font-serif);}
+.fg{margin-bottom:1.4rem;}
+.fg label{display:block;font-size:0.46rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--lichen);margin-bottom:0.55rem;}
+.fg input,.fg textarea,.fg select{
+  width:100%;background:rgba(16,30,14,0.8);
+  border:1px solid rgba(130,185,100,0.25);
+  padding:0.82rem 1rem;font-family:var(--font-sans);font-size:0.74rem;font-weight:300;
+  color:var(--cream);outline:none;border-radius:0;-webkit-appearance:none;
+  transition:border-color 0.25s;
+}
+.fg input::placeholder,.fg textarea::placeholder{color:rgba(180,220,150,0.28);}
+.fg input:focus,.fg textarea:focus,.fg select:focus{border-color:rgba(130,185,100,0.55);}
+.fg select option{background:#1e3220;}
+.fg textarea{height:125px;resize:none;}
+.form-note{font-size:0.54rem;color:rgba(180,220,150,0.3);margin-top:0.9rem;line-height:1.7;font-style:italic;}
+
+.fade{opacity:0;transform:translateY(20px);transition:opacity 0.9s ease,transform 0.9s cubic-bezier(0.23,1,0.32,1);}
+.fade.in{opacity:1;transform:none;}
+
+footer{
+  padding:1rem 3rem;border-top:1px solid rgba(130,185,100,0.1);
+  display:flex;justify-content:space-between;
+  background:rgba(12,20,10,0.9);position:relative;z-index:10;
+}
+footer p{font-size:0.42rem;letter-spacing:0.16em;text-transform:uppercase;color:rgba(180,220,150,0.15);}
+
+@media(max-width:860px){
+  nav{padding:0 1.5rem;}
+  .hero{grid-template-columns:1fr;}
+  .hero-right{min-height:55vw;}
+  .hero-left{padding:3rem 1.5rem 2.5rem;}
+  .about-band{grid-template-columns:1fr;padding:3rem 1.5rem;}
+  .about-div{display:none;}
+  .featured-sec{padding:0 1.5rem 4rem;}
+  .cat-hero,.filter-bar,.cat-grid{padding-left:1.5rem;padding-right:1.5rem;}
+  .cat-hero{flex-direction:column;align-items:flex-start;padding:3rem 1.5rem 2rem;}
+  .cat-grid{grid-template-columns:repeat(2,1fr);}
+  .contact-wrap{grid-template-columns:1fr;gap:3rem;padding:3rem 1.5rem 4rem;}
+  .feat-grid{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+<div id="grain"></div>
+<div id="vignette"></div>
+
+<nav>
+  <a class="nav-logo" onclick="go('home')">Ambs<em>pottery</em></a>
+  <ul class="nav-tabs">
+    <li><a class="active" data-p="home" onclick="go('home')">Home</a></li>
+    <li><a data-p="catalog" onclick="go('catalog')">Catalog</a></li>
+    <li><a data-p="contact" onclick="go('contact')">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HOME -->
+<div id="pg-home" class="page active">
+  <section class="hero">
+    <div class="hero-left">
+      <div class="hero-eyebrow fade">Handmade Ceramics — Chicago</div>
+      <h1 class="hero-h1 fade">Formed<br>from the<br><em>earth.</em></h1>
+      <p class="hero-p fade">Each piece thrown by hand. Inspired by moss, stone, and old-growth forest. Functional objects made to be touched, used, and kept.</p>
+      <div class="hero-btns fade">
+        <span class="btn" onclick="go('catalog')">Shop Now</span>
+        <span class="btn-ghost" onclick="go('contact')">Get in Touch</span>
+      </div>
+    </div>
+    <div class="hero-right">
+      <!-- Replace with: <img class="hero-img" src="ambs1.jpeg" alt="Pottery"> -->
+      <div class="hero-ph"><span class="ph-txt">Add your photo here</span></div>
+    </div>
+  </section>
+  <div class="hr-line"></div>
+  <div class="about-band">
+    <div class="fade"><h2 class="ab-h2">Made with<br><em>intention.</em></h2></div>
+    <div class="about-div"></div>
+    <div class="fade">
+      <p class="ab-p">Every piece starts as raw clay and becomes something that fits naturally into daily life — a mug that holds morning coffee, a bowl that anchors a table, a vase that holds a single branch.</p>
+      <p class="ab-p">The forms are simple. The textures are not. Ash glazes, iron slips, and forest-floor palettes — each finish is a small experiment in letting the material speak.</p>
+    </div>
+  </div>
+  <div class="hr-line"></div>
+  <div class="featured-sec" style="padding-top:3.5rem;">
+    <div class="sec-label fade">Recent Work</div>
+    <div class="feat-grid">
+      <div class="feat-item fade"><div class="feat-ph"><div class="feat-ph-in fp1"><span class="ph-txt">Add photo</span></div></div><div class="feat-meta"><div class="feat-name">Ash Glaze Mug</div><div class="feat-price">$48</div></div></div>
+      <div class="feat-item fade"><div class="feat-ph"><div class="feat-ph-in fp2"><span class="ph-txt">Add photo</span></div></div><div class="feat-meta"><div class="feat-name">Moss Bowl</div><div class="feat-price">$65</div></div></div>
+      <div class="feat-item fade"><div class="feat-ph"><div class="feat-ph-in fp3"><span class="ph-txt">Add photo</span></div></div><div class="feat-meta"><div class="feat-name">Stone Slip Vase</div><div class="feat-price">$82</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- CATALOG -->
+<div id="pg-catalog" class="page">
+  <div class="cat-hero">
+    <h1 class="cat-h1 fade">The<br><em>Catalog.</em></h1>
+    <p class="cat-intro fade">All pieces are one-of-a-kind — thrown, trimmed, and glazed by hand. Available while stock lasts.</p>
+  </div>
+  <div class="filter-bar">
+    <button class="fb on" onclick="filt(this)">All</button>
+    <button class="fb" onclick="filt(this)">Mugs</button>
+    <button class="fb" onclick="filt(this)">Bowls</button>
+    <button class="fb" onclick="filt(this)">Vases</button>
+    <button class="fb" onclick="filt(this)">Plates</button>
+  </div>
+  <div class="cat-grid">
+    <div class="cat-item fade"><div class="cat-ph"><div class="cat-ph-in cp1"><span class="ph-txt">Add photo</span></div></div><div class="cat-name">Ash Glaze Mug</div><div class="cat-sub">Mugs — 12oz</div><div class="cat-price">$48</div></div>
+    <div class="cat-item fade"><div class="cat-ph"><div class="cat-ph-in cp2"><span class="ph-txt">Add photo</span></div></div><div class="cat-name">Moss Bowl</div><div class="cat-sub">Bowls — Medium</div><div class="cat-price">$65</div></div>
+    <div class="cat-item fade"><div class="cat-ph"><div class="cat-ph-in cp3"><span class="ph-txt">Add photo</span></div></div><div class="cat-name">Stone Slip Vase</div><div class="cat-sub">Vases — Tall</div><div class="cat-price">$82</div></div>
+    <div class="cat-item fade"><div class="cat-ph"><div class="cat-ph-in cp4"><span class="ph-txt">Add photo</span></div></div><div class="cat-name">Bark Plate</div><div class="cat-sub">Plates — Dinner</div><div class="cat-price">$55</div></div>
+    <div class="cat-item fade"><div class="cat-ph"><div class="cat-ph-in cp5"><span class="ph-txt">Add photo</span></div></div><div class="cat-name">Lichen Cup</div><div class="cat-sub">Mugs — 8oz</div><div class="cat-price">$38</div></div>
+    <div class="cat-item fade"><div class="cat-ph"><div class="cat-ph-in cp6"><span class="ph-txt">Add photo</span></div></div><div class="cat-name">Forest Floor Bowl</div><div class="cat-sub">Bowls — Small</div><div class="cat-price">$44</div></div>
+    <div class="cat-item fade"><div class="cat-ph"><div class="cat-ph-in cp7"><span class="ph-txt">Add photo</span></div></div><div class="cat-name">Iron Slip Vase</div><div class="cat-sub">Vases — Short</div><div class="cat-price">$68</div></div>
+    <div class="cat-item fade"><div class="cat-ph"><div class="cat-ph-in cp8"><span class="ph-txt">Add photo</span></div></div><div class="cat-name">Stone Dinner Plate</div><div class="cat-sub">Plates — Set of 2</div><div class="cat-price">$95</div></div>
+  </div>
+</div>
+
+<!-- CONTACT -->
+<div id="pg-contact" class="page">
+  <div class="contact-wrap">
+    <div>
+      <h1 class="con-h1 fade">Let's<br><em>talk.</em></h1>
+      <p class="con-p fade">Interested in a custom piece, wholesale, or just curious about the process? All inquiries welcome.</p>
+      <div class="con-details fade">
+        <div class="cd"><span class="cd-l">Based in</span><span class="cd-v">Chicago, Illinois</span></div>
+        <div class="cd"><span class="cd-l">Email</span><span class="cd-v">hello@ambspottery.com</span></div>
+        <div class="cd"><span class="cd-l">Instagram</span><span class="cd-v">@ambspottery</span></div>
+        <div class="cd"><span class="cd-l">Turnaround</span><span class="cd-v">2–4 weeks for custom pieces</span></div>
+      </div>
+    </div>
+    <div class="fade">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.4rem;">
+        <div class="fg" style="margin:0;"><label>First Name</label><input type="text" placeholder="Anna"/></div>
+        <div class="fg" style="margin:0;"><label>Last Name</label><input type="text" placeholder="Smith"/></div>
+      </div>
+      <div class="fg"><label>Email</label><input type="email" placeholder="your@email.com"/></div>
+      <div class="fg"><label>Subject</label><select><option value="">— Select —</option><option>Custom Order</option><option>Wholesale</option><option>General Question</option><option>Other</option></select></div>
+      <div class="fg"><label>Message</label><textarea placeholder="Tell me about your piece..."></textarea></div>
+      <button class="btn" style="width:100%;">Send Message</button>
+      <p class="form-note">I read every message personally and respond within 48 hours.</p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>© 2024 Ambspottery</p><p>All rights reserved</p>
+</footer>
+
+<script>
+const canvas = document.getElementById('bg-canvas');
+const ctx = canvas.getContext('2d');
+let W, H, scene, tick = 0;
+
+function rnd(a,b){return a+Math.random()*(b-a);}
+function rndInt(a,b){return Math.floor(rnd(a,b));}
+function pick(a){return a[Math.floor(Math.random()*a.length)];}
+
+// ── MOUNTAIN SILHOUETTES ──────────────────────────────────
+// Build layered ridgelines like the Smoky Mountains photo
+function makeMountainLayer(yBase, amplitude, freq, col, alpha) {
+  const pts = [{x: 0, y: yBase}];
+  const steps = 80;
+  for (let i = 1; i <= steps; i++) {
+    const x = (i / steps) * W;
+    // Multiple sine waves layered for organic shape
+    const y = yBase
+      - amplitude * (
+          0.55 * Math.sin(i * freq * 0.9 + 1.2)
+        + 0.28 * Math.sin(i * freq * 1.8 + 0.4)
+        + 0.17 * Math.sin(i * freq * 3.1 + 2.1)
+      );
+    pts.push({x, y});
+  }
+  pts.push({x: W, y: yBase});
+  pts.push({x: 0, y: yBase});
+  return {pts, col, alpha, type:'mountain'};
+}
+
+// ── LICHEN COLONY ─────────────────────────────────────────
+// Groups of small irregular ellipses clustered together
+// like the round crusty colonies on the rock face photo
+function makeLichenColony(cx, cy, spread, count, col, alpha) {
+  const blobs = [];
+  for (let i = 0; i < count; i++) {
+    const angle = rnd(0, Math.PI * 2);
+    const d = rnd(0, spread);
+    const bx = cx + Math.cos(angle) * d;
+    const by = cy + Math.sin(angle) * d * rnd(0.5, 0.9);
+    const r = rnd(spread * 0.04, spread * 0.22);
+    blobs.push({
+      x: bx, y: by,
+      rx: r * rnd(0.7, 1.8),
+      ry: r * rnd(0.5, 1.2),
+      rot: rnd(-Math.PI, Math.PI),
+    });
+  }
+  return {blobs, col, alpha,
+    flicker: rnd(0.003, 0.012),
+    flkOff: rnd(0, Math.PI * 2),
+    type: 'lichen'
+  };
+}
+
+// ── ROCK CRACK ────────────────────────────────────────────
+function makeCrack(x1, y1, x2, y2, col, alpha) {
+  const pts = [{x:x1,y:y1}];
+  const steps = rndInt(5,12);
+  for (let i=1;i<steps;i++){
+    const t=i/steps;
+    pts.push({
+      x: x1+(x2-x1)*t + rnd(-20,20),
+      y: y1+(y2-y1)*t + rnd(-6,6),
+    });
+  }
+  pts.push({x:x2,y:y2});
+  return {pts, col, alpha, lw: rnd(0.4,1.6), type:'crack'};
+}
+
+// ── MOSS PATCH ────────────────────────────────────────────
+// Larger irregular filled shapes — like moss spreading on bark
+function makeMossPatch(cx, cy, rx, ry, col, alpha) {
+  // Build as a random polygon
+  const pts = [];
+  const segs = rndInt(12, 22);
+  for (let i = 0; i < segs; i++) {
+    const a = (i / segs) * Math.PI * 2;
+    const r = rnd(0.55, 1.0);
+    pts.push({
+      x: cx + Math.cos(a) * rx * r * rnd(0.7, 1.3),
+      y: cy + Math.sin(a) * ry * r * rnd(0.7, 1.3),
+    });
+  }
+  return {pts, cx, cy, rx, ry, col, alpha,
+    flicker: rnd(0.002, 0.009),
+    flkOff: rnd(0, Math.PI * 2),
+    type: 'moss'
+  };
+}
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight * 3.5;
+  buildScene();
+}
+
+function buildScene() {
+  scene = [];
+  const pageH = H;
+
+  // ── MOUNTAIN LAYERS (bottom third of page as base)
+  // Far distance — muted teal-grey (like the distant Smokies)
+  scene.push(makeMountainLayer(pageH * 0.88, pageH * 0.06, 0.18, {r:38,g:72,b:55}, 0.28));
+  scene.push(makeMountainLayer(pageH * 0.82, pageH * 0.08, 0.14, {r:42,g:80,b:52}, 0.32));
+  scene.push(makeMountainLayer(pageH * 0.76, pageH * 0.10, 0.12, {r:50,g:90,b:55}, 0.35));
+  // Mid mountains — richer green
+  scene.push(makeMountainLayer(pageH * 0.70, pageH * 0.12, 0.10, {r:55,g:100,b:45}, 0.38));
+  scene.push(makeMountainLayer(pageH * 0.62, pageH * 0.14, 0.09, {r:48,g:92,b:38}, 0.30));
+  // Foreground ridgeline — dark forest
+  scene.push(makeMountainLayer(pageH * 0.55, pageH * 0.10, 0.08, {r:30,g:55,b:25}, 0.35));
+
+  // Also scatter mountains across upper sections of long page
+  scene.push(makeMountainLayer(pageH * 0.38, pageH * 0.07, 0.15, {r:40,g:75,b:48}, 0.2));
+  scene.push(makeMountainLayer(pageH * 0.33, pageH * 0.09, 0.12, {r:52,g:88,b:42}, 0.22));
+  scene.push(makeMountainLayer(pageH * 0.28, pageH * 0.08, 0.10, {r:35,g:65,b:30}, 0.2));
+
+  // ── LICHEN COLONIES — scattered across page
+  // Warm chartreuse lichen (like the bright green on the dark rock)
+  const lichenCols = [
+    {r:115,g:168,b:58},  // bright lime lichen
+    {r:95, g:148,b:48},  // mid lichen
+    {r:135,g:185,b:70},  // pale lichen
+    {r:80, g:128,b:42},  // deeper lichen
+    {r:148,g:178,b:88},  // grey-green lichen
+    {r:72, g:110,b:55},  // stone lichen
+  ];
+  for (let i = 0; i < 60; i++) {
+    const col = pick(lichenCols);
+    const spread = rnd(18, 90);
+    scene.push(makeLichenColony(
+      rnd(0.02, 0.98) * W,
+      rnd(0.01, 0.99) * pageH,
+      spread,
+      rndInt(6, 20),
+      col,
+      rnd(0.12, 0.42)
+    ));
+  }
+
+  // ── MOSS PATCHES — larger organic shapes
+  const mossCols = [
+    {r:58, g:110,b:32},  // vivid moss
+    {r:42, g:88, b:25},  // deep moss
+    {r:72, g:125,b:42},  // bright moss
+    {r:35, g:70, b:22},  // dark moss
+    {r:85, g:140,b:52},  // light moss
+    {r:48, g:95, b:35},  // stone moss
+  ];
+  for (let i = 0; i < 38; i++) {
+    scene.push(makeMossPatch(
+      rnd(0.02, 0.98) * W,
+      rnd(0.02, 0.98) * pageH,
+      rnd(30, 160),
+      rnd(18, 100),
+      pick(mossCols),
+      rnd(0.08, 0.28)
+    ));
+  }
+
+  // ── ROCK CRACKS ── angular fissures like the rockface photo
+  const crackCols = [
+    {r:25,g:48,b:18},{r:20,g:40,b:15},{r:30,g:55,b:22}
+  ];
+  for (let i = 0; i < 35; i++) {
+    const x = rnd(0, W), y = rnd(0, pageH);
+    const len = rnd(50, 260);
+    const angle = rnd(-0.5, 0.5) + (Math.random() > 0.5 ? 0 : Math.PI / 2);
+    scene.push(makeCrack(
+      x, y,
+      x + Math.cos(angle) * len,
+      y + Math.sin(angle) * len,
+      pick(crackCols),
+      rnd(0.12, 0.32)
+    ));
+  }
+}
+
+// ── DRAW FUNCTIONS ──────────────────────────────────────
+function drawMountain(m) {
+  if (m.pts.length < 3) return;
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(m.pts[0].x, m.pts[0].y);
+  for (let i = 1; i < m.pts.length; i++) ctx.lineTo(m.pts[i].x, m.pts[i].y);
+  ctx.closePath();
+  // Fill with gradient — lighter at ridge, darker at base (depth)
+  const top = Math.min(...m.pts.map(p => p.y));
+  const bot = Math.max(...m.pts.map(p => p.y));
+  const g = ctx.createLinearGradient(0, top, 0, bot);
+  g.addColorStop(0, `rgba(${m.col.r},${m.col.g},${m.col.b},${m.alpha})`);
+  g.addColorStop(1, `rgba(${Math.max(0,m.col.r-15)},${Math.max(0,m.col.g-20)},${Math.max(0,m.col.b-10)},${m.alpha * 0.6})`);
+  ctx.fillStyle = g;
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawLichen(l) {
+  const breath = 0.9 + 0.1 * Math.sin(tick * l.flicker + l.flkOff);
+  const a = l.alpha * breath;
+  l.blobs.forEach(b => {
+    ctx.save();
+    ctx.translate(b.x, b.y);
+    ctx.rotate(b.rot);
+    ctx.scale(1, b.ry / Math.max(b.rx, 0.1));
+
+    // Outer soft halo
+    const gOut = ctx.createRadialGradient(0,0,0,0,0,b.rx*2.5);
+    gOut.addColorStop(0, `rgba(${l.col.r},${l.col.g},${l.col.b},${a*0.2})`);
+    gOut.addColorStop(1, `rgba(${l.col.r},${l.col.g},${l.col.b},0)`);
+    ctx.beginPath(); ctx.arc(0,0,b.rx*2.5,0,Math.PI*2);
+    ctx.fillStyle = gOut; ctx.fill();
+
+    // Dense crusty core
+    const gCore = ctx.createRadialGradient(0,0,0,0,0,b.rx);
+    gCore.addColorStop(0, `rgba(${Math.min(255,l.col.r+25)},${Math.min(255,l.col.g+28)},${Math.min(255,l.col.b+15)},${a})`);
+    gCore.addColorStop(0.6, `rgba(${l.col.r},${l.col.g},${l.col.b},${a*0.75})`);
+    gCore.addColorStop(1, `rgba(${l.col.r},${l.col.g},${l.col.b},0)`);
+    ctx.beginPath(); ctx.arc(0,0,b.rx,0,Math.PI*2);
+    ctx.fillStyle = gCore; ctx.fill();
+
+    ctx.restore();
+  });
+}
+
+function drawMoss(m) {
+  const breath = 0.92 + 0.08 * Math.sin(tick * m.flicker + m.flkOff);
+  const a = m.alpha * breath;
+  if (m.pts.length < 3) return;
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(m.pts[0].x, m.pts[0].y);
+  for (let i = 1; i < m.pts.length; i++) ctx.lineTo(m.pts[i].x, m.pts[i].y);
+  ctx.closePath();
+  // Radial fill — brighter center, fading edges
+  const g = ctx.createRadialGradient(m.cx, m.cy, 0, m.cx, m.cy, Math.max(m.rx, m.ry));
+  g.addColorStop(0, `rgba(${Math.min(255,m.col.r+20)},${Math.min(255,m.col.g+22)},${Math.min(255,m.col.b+12)},${a})`);
+  g.addColorStop(0.5, `rgba(${m.col.r},${m.col.g},${m.col.b},${a*0.7})`);
+  g.addColorStop(1, `rgba(${m.col.r},${m.col.g},${m.col.b},0)`);
+  ctx.fillStyle = g;
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawCrack(c) {
+  ctx.save();
+  ctx.strokeStyle = `rgba(${c.col.r},${c.col.g},${c.col.b},${c.alpha})`;
+  ctx.lineWidth = c.lw;
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.beginPath();
+  ctx.moveTo(c.pts[0].x, c.pts[0].y);
+  for (let i=1;i<c.pts.length;i++) ctx.lineTo(c.pts[i].x, c.pts[i].y);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawGrain() {
+  const scanH = Math.min(H, window.innerHeight * 1.5);
+  const id = ctx.getImageData(0, 0, W, scanH), d = id.data;
+  for (let i = 0; i < d.length; i += 4) {
+    const n = (Math.random() - 0.5) * 22;
+    d[i]  =Math.max(0,Math.min(255,d[i]+n));
+    d[i+1]=Math.max(0,Math.min(255,d[i+1]+n));
+    d[i+2]=Math.max(0,Math.min(255,d[i+2]+n));
+  }
+  ctx.putImageData(id, 0, 0);
+}
+
+let last = 0;
+function loop(ts) {
+  if (ts - last > 58) {
+    tick++;
+    ctx.clearRect(0, 0, W, H);
+
+    // Base: medium green — #1e3220 equivalent
+    ctx.fillStyle = '#1e3220';
+    ctx.fillRect(0, 0, W, H);
+
+    // Subtle dappled light zones — canopy filtering
+    const lights = [
+      {x:0.2*W, y:0.08*H, r:350, col:{r:52,g:95,b:30}, a:0.06},
+      {x:0.75*W,y:0.2*H,  r:280, col:{r:45,g:85,b:38}, a:0.05},
+      {x:0.5*W, y:0.5*H,  r:400, col:{r:50,g:90,b:28}, a:0.045},
+      {x:0.12*W,y:0.65*H, r:300, col:{r:42,g:80,b:35}, a:0.05},
+      {x:0.85*W,y:0.8*H,  r:320, col:{r:48,g:88,b:30}, a:0.048},
+    ];
+    lights.forEach(l => {
+      const g = ctx.createRadialGradient(l.x,l.y,0,l.x,l.y,l.r);
+      g.addColorStop(0,`rgba(${l.col.r},${l.col.g},${l.col.b},${l.a})`);
+      g.addColorStop(1,`rgba(${l.col.r},${l.col.g},${l.col.b},0)`);
+      ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+    });
+
+    // Draw in depth order: mountains → moss → cracks → lichen
+    scene.filter(s => s.type === 'mountain').forEach(drawMountain);
+    scene.filter(s => s.type === 'moss').forEach(drawMoss);
+    scene.filter(s => s.type === 'crack').forEach(drawCrack);
+    scene.filter(s => s.type === 'lichen').forEach(drawLichen);
+
+    drawGrain();
+    last = ts;
+  }
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('resize', resize);
+resize();
+loop(0);
+
+// ── PAGE NAV ──
+function go(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('pg-' + id).classList.add('active');
+  document.querySelectorAll('.nav-tabs a').forEach(a => a.classList.toggle('active', a.dataset.p === id));
+  window.scrollTo({top:0,behavior:'instant'});
+  setTimeout(reveal, 60);
+}
+function filt(btn) {
+  document.querySelectorAll('.fb').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+}
+function reveal() {
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach((e,i) => {
+      if (e.isIntersecting) { setTimeout(() => e.target.classList.add('in'), i*80); obs.unobserve(e.target); }
+    });
+  }, {threshold:0.07});
+  document.querySelectorAll('.page.active .fade:not(.in)').forEach(el => obs.observe(el));
+}
+document.querySelectorAll('.nav-tabs a').forEach(a => { a.dataset.p = a.textContent.trim().toLowerCase(); });
+reveal();
+</script>
+</body>
+</html>
