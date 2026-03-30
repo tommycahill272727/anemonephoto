@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio — Anemone Photo</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Oswald:wght@700&family=Lora:ital,wght@0,400;1,400&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --ink:#0a0907; --ink2:#1c1510; --paper:#e8dfc8; --paper2:#f2ebe0;
+  --aged:#c9bc9e; --faded:#7a6e5a; --red:#8b2222; --red2:#a33030;
+  --gold:#c8a255; --pin:#cc3333; --pin2:#ff5555;
+}
+html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#06080f;font-family:'Lora',serif;}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  background:rgba(10,9,7,0.92);backdrop-filter:blur(8px);
+  padding:0.75rem 2rem;display:flex;justify-content:space-between;align-items:center;
+  border-bottom:2px solid var(--red);
+}
+.logo{font-family:'Oswald',sans-serif;font-weight:700;font-size:1.05rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--paper2);text-decoration:none;}
+.logo em{color:var(--red2);font-style:normal;}
+.nav-links{display:flex;gap:2.5rem;list-style:none;}
+.nav-links a{font-family:'Caveat',cursive;font-size:1.05rem;color:var(--aged);text-decoration:none;transition:color 0.2s;}
+.nav-links a:hover,.nav-links a.cur{color:var(--paper2);}
+.nav-right{display:flex;align-items:center;gap:0.8rem;}
+.nav-btn{font-family:'Special Elite',monospace;font-size:0.48rem;letter-spacing:0.25em;text-transform:uppercase;padding:0.28rem 0.65rem;border:1px solid rgba(139,34,34,0.45);color:rgba(232,224,208,0.45);background:transparent;cursor:pointer;transition:all 0.2s;}
+.nav-btn:hover,.nav-btn.on{border-color:var(--red2);color:var(--paper2);background:rgba(139,34,34,0.25);}
+.nav-btn.add{border-color:rgba(200,162,85,0.4);color:rgba(200,162,85,0.55);}
+.nav-btn.add:hover{border-color:var(--gold);color:var(--gold);background:rgba(200,162,85,0.1);}
+
+/* ── GLOBE ── */
+#globe-canvas{position:fixed;top:0;left:0;width:100%;height:100%;cursor:grab;}
+#globe-canvas:active{cursor:grabbing;}
+
+/* ── LOADING ── */
+#loading{
+  position:fixed;inset:0;z-index:900;background:#06080f;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;
+  transition:opacity 0.8s;
+}
+#loading.gone{opacity:0;pointer-events:none;}
+.ld-title{font-family:'Oswald',sans-serif;font-weight:700;font-size:1.5rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(200,185,160,0.4);}
+.ld-bar{width:200px;height:2px;background:rgba(200,162,85,0.1);position:relative;overflow:hidden;}
+.ld-bar::after{content:'';position:absolute;left:-100%;top:0;width:100%;height:100%;background:var(--gold);animation:ldslide 1.4s ease-in-out infinite;}
+@keyframes ldslide{0%{left:-100%;}100%{left:100%;}}
+
+/* ── HOVER LABEL ── */
+#hover-label{
+  position:fixed;z-index:150;pointer-events:none;opacity:0;transition:opacity 0.15s;
+  background:rgba(10,9,7,0.9);border:1px solid rgba(200,162,85,0.35);
+  padding:0.45rem 0.85rem;white-space:nowrap;
+}
+#hover-label .hl-name{font-family:'Oswald',sans-serif;font-weight:700;font-size:0.75rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--paper2);}
+#hover-label .hl-loc{font-family:'Special Elite',monospace;font-size:0.48rem;letter-spacing:0.2em;color:var(--gold);}
+
+/* ── TRIP PANEL ── */
+#trip-panel{
+  position:fixed;inset:0;z-index:300;
+  background:var(--ink);
+  transform:translateY(100%);
+  transition:transform 0.45s cubic-bezier(0.2,1,0.3,1);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+#trip-panel.open{transform:translateY(0);}
+.tp-header{
+  background:var(--ink2);padding:0 2.5rem;height:58px;
+  border-bottom:2px solid var(--red);
+  display:flex;align-items:center;gap:1.4rem;
+  flex-shrink:0;
+}
+
+.tp-back{
+  display:flex;align-items:center;gap:0.5rem;
+  font-family:'Oswald',sans-serif;font-weight:700;font-size:0.65rem;
+  letter-spacing:0.18em;text-transform:uppercase;
+  color:rgba(200,185,160,0.55);background:transparent;
+  border:none;padding:0 0.5rem 0 0;cursor:pointer;
+  transition:color 0.2s;flex-shrink:0;
+}
+.tp-back:hover{color:var(--paper2);}
+.tp-back svg{width:18px;height:18px;stroke:currentColor;fill:none;flex-shrink:0;}
+.tp-divider{width:1px;height:28px;background:rgba(200,185,160,0.1);flex-shrink:0;}
+.tp-header-info{display:flex;align-items:baseline;gap:1rem;flex:1;min-width:0;}
+.tp-edit-trip-btn{
+  font-family:'Special Elite',monospace;font-size:0.44rem;letter-spacing:0.2em;text-transform:uppercase;
+  color:rgba(200,162,85,0.45);border:1px solid rgba(200,162,85,0.2);background:transparent;
+  padding:0.25rem 0.6rem;cursor:pointer;transition:all 0.2s;flex-shrink:0;display:none;
+}
+.tp-edit-trip-btn:hover{color:var(--gold);border-color:var(--gold);}
+.edit-mode .tp-edit-trip-btn{display:inline-block;}
+.tp-trip-name{font-family:'Oswald',sans-serif;font-weight:700;font-size:1.05rem;letter-spacing:0.05em;text-transform:uppercase;color:var(--paper2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tp-loc-row{display:flex;align-items:center;gap:0.35rem;}
+.tp-pin-icon{color:#dd4444;font-size:0.7rem;flex-shrink:0;}
+.tp-location{font-family:'Special Elite',monospace;font-size:0.44rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);white-space:nowrap;}
+.tp-date{font-family:'Caveat',cursive;font-size:0.8rem;color:rgba(200,185,160,0.35);white-space:nowrap;}
+.tp-del{font-family:'Special Elite',monospace;font-size:0.42rem;letter-spacing:0.18em;text-transform:uppercase;color:rgba(139,34,34,0.35);border:1px solid rgba(139,34,34,0.18);background:transparent;padding:0.25rem 0.55rem;cursor:pointer;transition:all 0.2s;display:none;flex-shrink:0;}
+.tp-del:hover{color:var(--red2);border-color:var(--red);}
+.edit-mode .tp-del{font-family:'Special Elite',monospace;font-size:0.42rem;letter-spacing:0.18em;text-transform:uppercase;color:rgba(139,34,34,0.35);border:1px solid rgba(139,34,34,0.18);background:transparent;padding:0.25rem 0.55rem;cursor:pointer;transition:all 0.2s;display:none;flex-shrink:0;}
+
+.tp-body{flex:1;overflow-y:auto;padding:2.5rem 3rem 4rem;background:var(--ink);}
+.tp-body::-webkit-scrollbar{width:4px;}
+.tp-body::-webkit-scrollbar-thumb{background:rgba(139,34,34,0.2);}
+.tp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.2rem;}
+
+.tp-photo{position:relative;aspect-ratio:3/2;overflow:hidden;background:var(--ink);cursor:pointer;transition:transform 0.35s cubic-bezier(0.2,1,0.3,1),box-shadow 0.35s;}
+.tp-photo:hover{transform:scale(1.015);box-shadow:0 8px 40px rgba(0,0,0,0.5);}
+.tp-photo img{width:100%;height:100%;object-fit:cover;display:block;}
+.tp-photo .ph-cap{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(8,7,5,0.92));padding:2rem 1rem 0.8rem;opacity:0;transition:opacity 0.3s;}
+.tp-photo:hover .ph-cap{opacity:1;}
+.ph-cap-text{font-family:'Caveat',cursive;font-size:0.8rem;color:var(--paper2);display:block;}
+.ph-cap-desc{font-family:'Lora',serif;font-style:italic;font-size:0.72rem;color:rgba(200,185,160,0.6);display:block;margin-top:3px;line-height:1.4;}
+.ph-cap-cam{font-family:'Special Elite',monospace;font-size:0.38rem;letter-spacing:0.14em;color:var(--gold);display:block;margin-top:4px;}
+.tp-photo .ph-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;color:rgba(200,185,160,0.18);gap:0.3rem;}
+.tp-photo .ph-placeholder svg{width:26px;height:26px;stroke:currentColor;fill:none;}
+.tp-photo .ph-placeholder span{font-family:'Special Elite',monospace;font-size:0.38rem;letter-spacing:0.18em;text-transform:uppercase;}
+
+/* edit overlay */
+.ph-edit-ov{position:absolute;inset:0;background:rgba(100,20,20,0.75);display:none;align-items:center;justify-content:center;flex-direction:column;gap:0.35rem;cursor:pointer;}
+.ph-edit-ov span{font-family:'Special Elite',monospace;font-size:0.4rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--paper2);}
+.ph-edit-ov svg{width:20px;height:20px;stroke:var(--paper2);fill:none;}
+.edit-mode .tp-photo:hover .ph-edit-ov{display:flex;}
+
+/* photo caption editor */
+.pce{display:none;position:absolute;inset:0;background:rgba(10,9,7,0.93);flex-direction:column;gap:0.45rem;padding:0.7rem;z-index:10;}
+.pce.on{display:flex;}
+.pce input,.pce textarea{font-family:'Caveat',cursive;font-size:0.85rem;background:transparent;border:none;border-bottom:1px solid rgba(200,162,85,0.35);color:var(--paper2);padding:0.18rem 0;outline:none;width:100%;resize:none;}
+.pce input::placeholder,.pce textarea::placeholder{color:rgba(200,185,160,0.25);}
+.pce textarea{line-height:1.5;min-height:48px;}
+.pce-btns{display:flex;gap:0.4rem;margin-top:0.2rem;}
+.pce-btn{font-family:'Special Elite',monospace;font-size:0.4rem;letter-spacing:0.18em;text-transform:uppercase;background:transparent;border:1px solid rgba(200,162,85,0.3);color:var(--gold);padding:0.2rem 0.45rem;cursor:pointer;}
+.pce-btn.danger{color:var(--red2);border-color:rgba(139,34,34,0.3);}
+
+.add-tile{aspect-ratio:4/3;border:1px dashed rgba(139,34,34,0.3);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.35rem;cursor:pointer;transition:all 0.2s;background:transparent;}
+.add-tile:hover{border-color:var(--red);background:rgba(139,34,34,0.05);}
+.add-tile svg{width:20px;height:20px;stroke:rgba(139,34,34,0.4);fill:none;}
+.add-tile span{font-family:'Special Elite',monospace;font-size:0.4rem;letter-spacing:0.18em;text-transform:uppercase;color:rgba(139,34,34,0.4);}
+
+/* edit mode fields in panel */
+.edit-mode .tp-trip-name[contenteditable="true"]{border-bottom:1.5px dashed rgba(200,162,85,0.5);cursor:text;}
+.edit-mode .tp-location[contenteditable="true"]{border-bottom:1px dashed rgba(200,162,85,0.5);cursor:text;}
+.edit-mode .tp-date[contenteditable="true"]{border-bottom:1px dashed rgba(200,162,85,0.4);cursor:text;}
+
+/* ── LIGHTBOX ── */
+#lb{position:fixed;inset:0;z-index:500;background:rgba(8,7,5,0.96);display:none;align-items:center;justify-content:center;flex-direction:column;}
+#lb.on{display:flex;}
+#lb img{max-width:88vw;max-height:80vh;object-fit:contain;display:block;box-shadow:0 0 60px rgba(0,0,0,0.6);}
+#lb .lb-cap{font-family:'Caveat',cursive;font-size:1.05rem;color:var(--paper2);margin-top:0.8rem;text-align:center;}
+#lb .lb-desc{font-family:'Lora',serif;font-style:italic;font-size:0.82rem;color:rgba(200,185,160,0.55);margin-top:0.35rem;text-align:center;max-width:600px;line-height:1.6;}
+#lb .lb-cam{font-family:'Special Elite',monospace;font-size:0.48rem;letter-spacing:0.2em;color:var(--gold);margin-top:0.3rem;text-align:center;}
+#lb .lb-x{position:absolute;top:1.5rem;right:1.5rem;font-family:'Special Elite',monospace;font-size:0.52rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--aged);background:transparent;border:1px solid rgba(200,185,160,0.18);padding:0.28rem 0.65rem;cursor:pointer;}
+#lb .lb-nav{position:absolute;top:50%;transform:translateY(-50%);font-family:'Oswald',sans-serif;font-weight:700;font-size:1.4rem;color:rgba(200,185,160,0.25);background:transparent;border:none;cursor:pointer;padding:1.2rem;transition:color 0.2s;}
+#lb .lb-nav:hover{color:var(--paper2);}
+#lb .lb-prev{left:1rem;}#lb .lb-next{right:1rem;}
+
+/* ── PASSWORD MODAL ── */
+#pw-modal{position:fixed;inset:0;z-index:600;background:rgba(8,7,5,0.9);display:none;align-items:center;justify-content:center;}
+#pw-modal.on{display:flex;}
+.pw-box{background:var(--paper2);padding:2.5rem;max-width:340px;width:90%;border-top:3px solid var(--red);background-image:repeating-linear-gradient(transparent,transparent 31px,rgba(160,140,100,0.13) 31px,rgba(160,140,100,0.13) 32px);background-size:100% 32px;}
+.pw-title{font-family:'Oswald',sans-serif;font-weight:700;font-size:1.4rem;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink2);margin-bottom:0.25rem;}
+.pw-sub{font-family:'Caveat',cursive;font-size:0.9rem;color:var(--faded);margin-bottom:1.5rem;}
+.pw-in{width:100%;font-family:'Special Elite',monospace;font-size:0.85rem;letter-spacing:0.1em;background:transparent;border:none;border-bottom:2px solid rgba(139,34,34,0.3);padding:0.45rem 0;outline:none;color:var(--ink2);margin-bottom:1.2rem;}
+.pw-in::placeholder{color:rgba(100,80,60,0.3);}
+.pw-row{display:flex;gap:0.7rem;align-items:center;}
+.pw-ok{font-family:'Special Elite',monospace;font-size:0.5rem;letter-spacing:0.28em;text-transform:uppercase;background:var(--red);color:var(--paper2);border:none;padding:0.52rem 1.1rem;cursor:pointer;transition:background 0.2s;}
+.pw-ok:hover{background:var(--red2);}
+.pw-cancel{font-family:'Special Elite',monospace;font-size:0.48rem;letter-spacing:0.2em;text-transform:uppercase;background:transparent;color:var(--faded);border:none;cursor:pointer;}
+.pw-err{font-family:'Caveat',cursive;font-size:0.85rem;color:var(--red);margin-top:0.5rem;display:none;}
+
+/* ── ADD TRIP MODAL ── */
+#at-modal{position:fixed;inset:0;z-index:600;background:rgba(8,7,5,0.9);display:none;align-items:center;justify-content:center;}
+#at-modal.on{display:flex;}
+.at-box{background:var(--paper2);padding:2.5rem;max-width:430px;width:90%;max-height:88vh;overflow-y:auto;border-top:3px solid var(--gold);background-image:repeating-linear-gradient(transparent,transparent 31px,rgba(160,140,100,0.13) 31px,rgba(160,140,100,0.13) 32px);background-size:100% 32px;}
+.at-title{font-family:'Oswald',sans-serif;font-weight:700;font-size:1.4rem;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink2);margin-bottom:1.4rem;}
+.at-field{margin-bottom:1.1rem;}
+.at-label{font-family:'Special Elite',monospace;font-size:0.48rem;letter-spacing:0.32em;text-transform:uppercase;color:var(--faded);display:block;margin-bottom:0.28rem;}
+.at-in{width:100%;font-family:'Caveat',cursive;font-size:1rem;background:transparent;border:none;border-bottom:1.5px solid rgba(139,34,34,0.28);padding:0.28rem 0;outline:none;color:var(--ink2);}
+.at-in:focus{border-bottom-color:var(--red);}
+.at-hint{font-family:'Caveat',cursive;font-size:0.75rem;color:var(--faded);margin-top:0.3rem;}
+.at-results{max-height:150px;overflow-y:auto;margin-top:0.35rem;border:1px solid rgba(139,34,34,0.12);}
+.at-opt{font-family:'Special Elite',monospace;font-size:0.5rem;letter-spacing:0.1em;padding:0.38rem 0.55rem;cursor:pointer;color:var(--ink2);border-bottom:1px solid rgba(160,140,100,0.18);transition:background 0.15s;}
+.at-opt:hover{background:rgba(139,34,34,0.06);}
+.at-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.9rem;}
+.at-btns{display:flex;gap:0.7rem;margin-top:1.4rem;}
+.at-ok{font-family:'Special Elite',monospace;font-size:0.5rem;letter-spacing:0.28em;text-transform:uppercase;background:var(--red);color:var(--paper2);border:none;padding:0.52rem 1.1rem;cursor:pointer;transition:background 0.2s;}
+.at-ok:hover{background:var(--red2);}
+.at-cancel{font-family:'Special Elite',monospace;font-size:0.48rem;letter-spacing:0.2em;text-transform:uppercase;background:transparent;color:var(--faded);border:none;cursor:pointer;}
+
+/* ── OVERLAY HINTS ── */
+#globe-hint{position:fixed;bottom:1.8rem;left:50%;transform:translateX(-50%);z-index:150;font-family:'Caveat',cursive;font-size:0.9rem;color:rgba(200,185,160,0.22);pointer-events:none;text-align:center;white-space:nowrap;transition:opacity 1.2s;}
+#edit-bar{position:fixed;top:56px;left:50%;transform:translateX(-50%);z-index:180;background:rgba(139,34,34,0.82);color:var(--paper2);font-family:'Special Elite',monospace;font-size:0.48rem;letter-spacing:0.28em;text-transform:uppercase;padding:0.28rem 1rem;display:none;pointer-events:none;}
+#edit-bar.on{display:block;}
+#empty{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:100;text-align:center;pointer-events:none;opacity:0;transition:opacity 0.5s;}
+#empty.on{opacity:1;}
+#empty h2{font-family:'Oswald',sans-serif;font-weight:700;font-size:1.8rem;letter-spacing:0.06em;text-transform:uppercase;color:rgba(200,185,160,0.12);}
+#empty p{font-family:'Caveat',cursive;font-size:0.95rem;color:rgba(200,185,160,0.09);margin-top:0.4rem;}
+</style>
+</head>
+<body>
+
+<input type="file" id="photo-file-input" accept="image/*" style="display:none;">
+
+<!-- LOADING -->
+<div id="loading">
+  <div class="ld-title">Loading Globe</div>
+  <div class="ld-bar"></div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <a class="logo" href="anemone-photo.html">Anemone <em>Photo</em></a>
+  <ul class="nav-links">
+    <li><a href="portfolio.html" class="cur">Portfolio</a></li>
+    <li><a href="journal.html">Journal</a></li>
+    <li><a href="anemone-photo.html#contact">Contact</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="nav-btn add" id="addTripBtn" style="display:none;">+ Add Trip</button>
+    <button class="nav-btn" id="editToggle">&#9998; Edit</button>
+  </div>
+</nav>
+
+<div id="edit-bar">&#9998; Editing mode — click trip panel text to edit</div>
+<div id="empty"><h2>No Trips Yet</h2><p>Enable edit mode and click + Add Trip</p></div>
+<canvas id="globe-canvas"></canvas>
+<div id="hover-label"><div class="hl-name" id="hlName"></div><div class="hl-loc" id="hlLoc"></div></div>
+<div id="globe-hint">Drag to rotate &nbsp;·&nbsp; Scroll to zoom &nbsp;·&nbsp; Click a pin to view trip</div>
+
+<!-- TRIP PANEL -->
+<div id="trip-panel">
+  <div class="tp-header">
+    <button class="tp-back" id="tpClose">
+      <svg viewBox="0 0 24 24" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+      Globe
+    </button>
+    <div class="tp-divider"></div>
+    <div class="tp-header-info">
+      <div class="tp-trip-name" id="tpName" contenteditable="false">Trip Name</div>
+      <div class="tp-loc-row"><span class="tp-pin-icon">&#9679;</span><span class="tp-location" id="tpLocation" contenteditable="false">Location</span></div>
+      <div class="tp-date" id="tpDate" contenteditable="false">Year</div>
+    </div>
+    <button class="tp-edit-trip-btn" id="tpEditBtn">&#9998; Edit Trip</button>
+    <button class="tp-del" id="tpDel">&#128465; Delete</button>
+  </div>
+  <div class="tp-body"><div class="tp-grid" id="tpGrid"></div></div>
+</div>
+
+<!-- LIGHTBOX -->
+<div id="lb">
+  <button class="lb-x" id="lbX">&#10005; Close</button>
+  <button class="lb-nav lb-prev" id="lbPrev">&#8592;</button>
+  <img id="lbImg" src="" alt="">
+  <div class="lb-cap" id="lbCap"></div>
+  <div class="lb-desc" id="lbDesc"></div>
+  <div class="lb-cam" id="lbCam"></div>
+  <button class="lb-nav lb-next" id="lbNext">&#8594;</button>
+</div>
+
+<!-- PASSWORD MODAL -->
+<div id="pw-modal">
+  <div class="pw-box">
+    <div class="pw-title">Edit Mode</div>
+    <div class="pw-sub">Enter your password to unlock editing</div>
+    <input type="password" class="pw-in" id="pwIn" placeholder="Password">
+    <div class="pw-row"><button class="pw-ok" id="pwOk">Unlock</button><button class="pw-cancel" id="pwCancel">Cancel</button></div>
+    <div class="pw-err" id="pwErr">Incorrect password</div>
+  </div>
+</div>
+
+<!-- ADD TRIP MODAL -->
+<div id="at-modal">
+  <div class="at-box">
+    <div class="at-title">Add New Trip</div>
+    <div class="at-field">
+      <label class="at-label">Trip Name</label>
+      <input type="text" class="at-in" id="atName" placeholder="e.g. Istanbul & Cappadocia">
+    </div>
+    <div class="at-field">
+      <label class="at-label">Search City / Place</label>
+      <input type="text" class="at-in" id="atSearch" placeholder="Type a city name...">
+      <div class="at-results" id="atResults" style="display:none;"></div>
+      <div class="at-hint">Or enter coordinates manually</div>
+    </div>
+    <div class="at-grid">
+      <div class="at-field"><label class="at-label">Latitude</label><input type="number" class="at-in" id="atLat" placeholder="e.g. 41.01" step="0.01"></div>
+      <div class="at-field"><label class="at-label">Longitude</label><input type="number" class="at-in" id="atLng" placeholder="e.g. 28.97" step="0.01"></div>
+    </div>
+    <div class="at-field"><label class="at-label">Location Label</label><input type="text" class="at-in" id="atLoc" placeholder="e.g. Istanbul, Türkiye"></div>
+    <div class="at-field"><label class="at-label">Date</label><input type="text" class="at-in" id="atDate" placeholder="e.g. Jan 2025"></div>
+    <div class="at-btns"><button class="at-ok" id="atOk">Add to Globe</button><button class="at-cancel" id="atCancel">Cancel</button></div>
+  </div>
+</div>
+
+<!-- EDIT TRIP MODAL -->
+<div id="et-modal" style="position:fixed;inset:0;z-index:700;background:rgba(8,7,5,0.92);display:none;align-items:center;justify-content:center;">
+  <div style="background:var(--paper2);padding:2.5rem;max-width:460px;width:92%;max-height:90vh;overflow-y:auto;border-top:3px solid var(--gold);background-image:repeating-linear-gradient(transparent,transparent 31px,rgba(160,140,100,0.13) 31px,rgba(160,140,100,0.13) 32px);background-size:100% 32px;">
+
+    <div style="font-family:'Oswald',sans-serif;font-weight:700;font-size:1.4rem;letter-spacing:0.04em;text-transform:uppercase;color:var(--ink2);margin-bottom:1.4rem;">Edit Trip</div>
+
+    <!-- Trip Name -->
+    <div style="margin-bottom:1rem;">
+      <label style="font-family:'Special Elite',monospace;font-size:0.48rem;letter-spacing:0.32em;text-transform:uppercase;color:var(--faded);display:block;margin-bottom:0.28rem;">Trip Name</label>
+      <input type="text" id="etName" style="width:100%;font-family:'Caveat',cursive;font-size:1rem;background:transparent;border:none;border-bottom:1.5px solid rgba(139,34,34,0.3);padding:0.28rem 0;outline:none;color:var(--ink2);">
+    </div>
+
+    <!-- Location Label -->
+    <div style="margin-bottom:1rem;">
+      <label style="font-family:'Special Elite',monospace;font-size:0.48rem;letter-spacing:0.32em;text-transform:uppercase;color:var(--faded);display:block;margin-bottom:0.28rem;">Location Label</label>
+      <input type="text" id="etLocation" style="width:100%;font-family:'Caveat',cursive;font-size:1rem;background:transparent;border:none;border-bottom:1.5px solid rgba(139,34,34,0.3);padding:0.28rem 0;outline:none;color:var(--ink2);">
+    </div>
+
+    <!-- Date -->
+    <div style="margin-bottom:1rem;">
+      <label style="font-family:'Special Elite',monospace;font-size:0.48rem;letter-spacing:0.32em;text-transform:uppercase;color:var(--faded);display:block;margin-bottom:0.28rem;">Date</label>
+      <input type="text" id="etDate" style="width:100%;font-family:'Caveat',cursive;font-size:1rem;background:transparent;border:none;border-bottom:1.5px solid rgba(139,34,34,0.3);padding:0.28rem 0;outline:none;color:var(--ink2);" placeholder="e.g. Jan 2025">
+    </div>
+
+    <!-- Coordinates -->
+    <div style="margin-bottom:0.5rem;">
+      <label style="font-family:'Special Elite',monospace;font-size:0.48rem;letter-spacing:0.32em;text-transform:uppercase;color:var(--faded);display:block;margin-bottom:0.28rem;">Coordinates (moves pin on globe)</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div>
+          <label style="font-family:'Special Elite',monospace;font-size:0.42rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(122,110,90,0.6);display:block;margin-bottom:0.2rem;">Latitude</label>
+          <input type="number" id="etLat" step="0.01" style="width:100%;font-family:'Caveat',cursive;font-size:1rem;background:transparent;border:none;border-bottom:1.5px solid rgba(139,34,34,0.25);padding:0.28rem 0;outline:none;color:var(--ink2);" placeholder="e.g. 60.47">
+        </div>
+        <div>
+          <label style="font-family:'Special Elite',monospace;font-size:0.42rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(122,110,90,0.6);display:block;margin-bottom:0.2rem;">Longitude</label>
+          <input type="number" id="etLng" step="0.01" style="width:100%;font-family:'Caveat',cursive;font-size:1rem;background:transparent;border:none;border-bottom:1.5px solid rgba(139,34,34,0.25);padding:0.28rem 0;outline:none;color:var(--ink2);" placeholder="e.g. -149.90">
+        </div>
+      </div>
+      <div id="etCoordsHint" style="font-family:'Caveat',cursive;font-size:0.75rem;color:var(--faded);margin-top:0.35rem;"></div>
+    </div>
+
+    <!-- Divider -->
+    <div style="height:1px;background:rgba(160,140,100,0.25);margin:1.5rem 0;"></div>
+
+    <!-- Actions -->
+    <div style="display:flex;gap:0.8rem;align-items:center;justify-content:space-between;">
+      <div style="display:flex;gap:0.8rem;align-items:center;">
+        <button id="etSave" style="font-family:'Special Elite',monospace;font-size:0.5rem;letter-spacing:0.28em;text-transform:uppercase;background:var(--red);color:var(--paper2);border:none;padding:0.52rem 1.1rem;cursor:pointer;transition:background 0.2s;">Save Changes</button>
+        <button id="etCancel" style="font-family:'Special Elite',monospace;font-size:0.48rem;letter-spacing:0.2em;text-transform:uppercase;background:transparent;color:var(--faded);border:none;cursor:pointer;">Cancel</button>
+      </div>
+      <button id="etDelete" style="font-family:'Special Elite',monospace;font-size:0.46rem;letter-spacing:0.2em;text-transform:uppercase;background:transparent;color:rgba(139,34,34,0.4);border:1px solid rgba(139,34,34,0.2);padding:0.4rem 0.8rem;cursor:pointer;transition:all 0.2s;">&#128465; Delete Trip</button>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ===================================================
+   PASSWORD — change the value below to set your own
+   =================================================== */
+const EDIT_PASSWORD = atob('YW5lbW9uZTIwMjU='); // anemone2025
+
+/* ===================================================
+   CITY DATABASE
+   =================================================== */
+const CITIES=[
+  {n:'Istanbul',c:'Türkiye',lat:41.01,lng:28.97},{n:'Cappadocia',c:'Türkiye',lat:38.64,lng:34.83},
+  {n:'Ankara',c:'Türkiye',lat:39.93,lng:32.85},{n:'Izmir',c:'Türkiye',lat:38.42,lng:27.14},
+  {n:'Riyadh',c:'Saudi Arabia',lat:24.69,lng:46.72},{n:'Jeddah',c:'Saudi Arabia',lat:21.54,lng:39.19},
+  {n:'Dubai',c:'UAE',lat:25.20,lng:55.27},{n:'Abu Dhabi',c:'UAE',lat:24.47,lng:54.37},
+  {n:'Muscat',c:'Oman',lat:23.61,lng:58.59},{n:'Doha',c:'Qatar',lat:25.29,lng:51.53},
+  {n:'Amman',c:'Jordan',lat:31.95,lng:35.93},{n:'Wadi Rum',c:'Jordan',lat:29.58,lng:35.42},
+  {n:'Petra',c:'Jordan',lat:30.33,lng:35.44},{n:'Cairo',c:'Egypt',lat:30.04,lng:31.24},
+  {n:'Bangkok',c:'Thailand',lat:13.75,lng:100.50},{n:'Chiang Mai',c:'Thailand',lat:18.79,lng:98.98},
+  {n:'Phuket',c:'Thailand',lat:7.88,lng:98.39},{n:'Hanoi',c:'Vietnam',lat:21.03,lng:105.85},
+  {n:'Ho Chi Minh City',c:'Vietnam',lat:10.82,lng:106.63},{n:'Hoi An',c:'Vietnam',lat:15.88,lng:108.32},
+  {n:'Bali',c:'Indonesia',lat:-8.34,lng:115.09},{n:'Jakarta',c:'Indonesia',lat:-6.21,lng:106.85},
+  {n:'Singapore',c:'Singapore',lat:1.35,lng:103.82},{n:'Yangon',c:'Myanmar',lat:16.87,lng:96.19},
+  {n:'Luang Prabang',c:'Laos',lat:19.89,lng:102.13},{n:'Phnom Penh',c:'Cambodia',lat:11.56,lng:104.92},
+  {n:'Siem Reap',c:'Cambodia',lat:13.36,lng:103.86},{n:'Kuala Lumpur',c:'Malaysia',lat:3.14,lng:101.69},
+  {n:'Tokyo',c:'Japan',lat:35.68,lng:139.69},{n:'Kyoto',c:'Japan',lat:35.01,lng:135.77},
+  {n:'Osaka',c:'Japan',lat:34.69,lng:135.50},{n:'Hiroshima',c:'Japan',lat:34.39,lng:132.45},
+  {n:'Seoul',c:'South Korea',lat:37.57,lng:126.98},{n:'Busan',c:'South Korea',lat:35.18,lng:129.07},
+  {n:'Beijing',c:'China',lat:39.91,lng:116.39},{n:'Shanghai',c:'China',lat:31.23,lng:121.47},
+  {n:'Hong Kong',c:'China',lat:22.32,lng:114.17},{n:'Taipei',c:'Taiwan',lat:25.03,lng:121.56},
+  {n:'Cusco',c:'Peru',lat:-13.53,lng:-71.97},{n:'Lima',c:'Peru',lat:-12.05,lng:-77.04},
+  {n:'Machu Picchu',c:'Peru',lat:-13.16,lng:-72.54},{n:'Rainbow Mountain',c:'Peru',lat:-13.95,lng:-71.25},
+  {n:'Arequipa',c:'Peru',lat:-16.41,lng:-71.54},{n:'Bogotá',c:'Colombia',lat:4.71,lng:-74.07},
+  {n:'Medellín',c:'Colombia',lat:6.25,lng:-75.56},{n:'Cartagena',c:'Colombia',lat:10.39,lng:-75.48},
+  {n:'Buenos Aires',c:'Argentina',lat:-34.60,lng:-58.38},{n:'Patagonia',c:'Argentina',lat:-51.63,lng:-69.21},
+  {n:'Santiago',c:'Chile',lat:-33.46,lng:-70.65},{n:'New York City',c:'USA',lat:40.71,lng:-74.01},
+  {n:'Los Angeles',c:'USA',lat:34.05,lng:-118.24},{n:'Chicago',c:'USA',lat:41.88,lng:-87.63},
+  {n:'Reykjavik',c:'Iceland',lat:64.14,lng:-21.94},{n:'Vatnajökull',c:'Iceland',lat:64.42,lng:-16.98},
+  {n:'Marrakech',c:'Morocco',lat:31.63,lng:-7.99},{n:'Sahara Desert',c:'Morocco',lat:30.21,lng:-5.88},
+  {n:'Casablanca',c:'Morocco',lat:33.59,lng:-7.62},{n:'Faroe Islands',c:'Denmark',lat:62.00,lng:-6.79},
+  {n:'Lofoten',c:'Norway',lat:68.35,lng:14.37},{n:'Oslo',c:'Norway',lat:59.91,lng:10.75},
+  {n:'Paris',c:'France',lat:48.86,lng:2.35},{n:'London',c:'UK',lat:51.51,lng:-0.13},
+  {n:'Barcelona',c:'Spain',lat:41.39,lng:2.15},{n:'Rome',c:'Italy',lat:41.90,lng:12.50},
+  {n:'Athens',c:'Greece',lat:37.98,lng:23.73},{n:'Santorini',c:'Greece',lat:36.39,lng:25.46},
+  {n:'Nairobi',c:'Kenya',lat:-1.29,lng:36.82},{n:'Cape Town',c:'South Africa',lat:-33.93,lng:18.42},
+];
+
+/* ===================================================
+   DATA
+   =================================================== */
+const PAGE='portfolio';
+let trips=[];
+let editMode=false;
+let activeTripId=null;
+let pendingPhotoTrip=null;
+let lbPhotos=[],lbIdx=0;
+
+function saveTrips(){try{localStorage.setItem(PAGE+'_trips',JSON.stringify(trips));}catch(e){alert('Storage limit — use smaller image files.');}}
+function loadTrips(){try{const d=localStorage.getItem(PAGE+'_trips');trips=d?JSON.parse(d):[];}catch(e){trips=[];}}
+
+/* ===================================================
+   THREE.JS SETUP
+   =================================================== */
+const canvas=document.getElementById('globe-canvas');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+renderer.shadowMap.enabled=false;
+
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(45,1,0.1,100);
+camera.position.set(0,0,3.0);
+
+// Lighting for a natural globe look
+const ambient=new THREE.AmbientLight(0xffeedd,0.6);
+scene.add(ambient);
+const sun=new THREE.DirectionalLight(0xfff5e8,1.2);
+sun.position.set(5,3,4);
+scene.add(sun);
+const fill=new THREE.DirectionalLight(0x223355,0.3);
+fill.position.set(-4,-2,-3);
+scene.add(fill);
+
+/* ===================================================
+   EARTH TEXTURES — real topographic map
+   =================================================== */
+const texLoader=new THREE.TextureLoader();
+texLoader.crossOrigin='anonymous';
+
+// We load a real satellite/topo Earth texture from a public CDN
+// Using Three.js's own bundled planet textures (guaranteed available at r128)
+const EARTH_COLOR  = 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/textures/planets/earth_atmos_2048.jpg';
+const EARTH_SPEC   = 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/textures/planets/earth_specular_2048.jpg';
+const EARTH_NORMAL = 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/textures/planets/earth_normal_2048.jpg';
+const EARTH_LIGHTS = 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/textures/planets/earth_lights_2048.png';
+const CLOUDS_TEX   = 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/textures/planets/earth_clouds_1024.png';
+
+let globeMesh, cloudMesh;
+let texturesLoaded=0;
+const TOTAL_TEXTURES=3;
+
+function onTexLoad(){
+  texturesLoaded++;
+  if(texturesLoaded>=TOTAL_TEXTURES){
+    const ld=document.getElementById('loading');
+    ld.classList.add('gone');
+    setTimeout(()=>{ld.style.display='none';},900);
+  }
+}
+
+// Globe
+const globeGeo=new THREE.SphereGeometry(1,64,64);
+
+texLoader.load(EARTH_COLOR, colorMap=>{
+  texLoader.load(EARTH_NORMAL, normalMap=>{
+    texLoader.load(EARTH_SPEC, specMap=>{
+      const mat=new THREE.MeshPhongMaterial({
+        map: colorMap,
+        normalMap: normalMap,
+        normalScale: new THREE.Vector2(0.85,0.85),
+        specularMap: specMap,
+        specular: new THREE.Color(0x4488bb),
+        shininess: 28,
+      });
+      globeMesh=new THREE.Mesh(globeGeo,mat);
+      scene.add(globeMesh);
+      onTexLoad(); onTexLoad(); onTexLoad();
+
+      // Clouds layer
+      texLoader.load(CLOUDS_TEX, cloudTex=>{
+        const cGeo=new THREE.SphereGeometry(1.008,64,64);
+        const cMat=new THREE.MeshPhongMaterial({
+          map: cloudTex,
+          transparent: true,
+          opacity: 0.38,
+          depthWrite: false,
+        });
+        cloudMesh=new THREE.Mesh(cGeo,cMat);
+        scene.add(cloudMesh);
+      });
+
+      // Atmosphere
+      const atmGeo=new THREE.SphereGeometry(1.04,64,64);
+      const atmMat=new THREE.MeshPhongMaterial({
+        color:0x4488cc,transparent:true,opacity:0.07,side:THREE.BackSide,depthWrite:false
+      });
+      scene.add(new THREE.Mesh(atmGeo,atmMat));
+
+      // Now add markers for loaded trips
+      trips.forEach(addPinToGlobe);
+      updateEmpty();
+    });
+  });
+});
+
+/* ===================================================
+   PIN GEOMETRY — actual map pin shape
+   =================================================== */
+const pinGroup=new THREE.Group();
+scene.add(pinGroup);
+const pinMeshes={};
+
+function makePinMesh(color){
+  const group=new THREE.Group();
+
+  // Head sphere
+  const headGeo=new THREE.SphereGeometry(0.028,16,16);
+  const headMat=new THREE.MeshPhongMaterial({color,emissive:new THREE.Color(color).multiplyScalar(0.3),shininess:60});
+  const head=new THREE.Mesh(headGeo,headMat);
+  head.position.set(0,0.058,0);
+  group.add(head);
+
+  // Needle — thin cone pointing down
+  const needleGeo=new THREE.ConeGeometry(0.008,0.065,8);
+  const needleMat=new THREE.MeshPhongMaterial({color,emissive:new THREE.Color(color).multiplyScalar(0.2),shininess:40});
+  const needle=new THREE.Mesh(needleGeo,needleMat);
+  needle.position.set(0,0.016,0);
+  needle.rotation.z=Math.PI; // point downward
+  group.add(needle);
+
+  // Small glow ring at base
+  const ringGeo=new THREE.RingGeometry(0.012,0.022,24);
+  const ringMat=new THREE.MeshBasicMaterial({color,transparent:true,opacity:0.25,side:THREE.DoubleSide});
+  const ring=new THREE.Mesh(ringGeo,ringMat);
+  ring.position.set(0,-0.01,0);
+  group.add(ring);
+
+  return group;
+}
+
+function latLngToVec3(lat,lng,r){
+  const phi=(90-lat)*(Math.PI/180);
+  const theta=(lng+180)*(Math.PI/180);
+  return new THREE.Vector3(
+    -r*Math.sin(phi)*Math.cos(theta),
+     r*Math.cos(phi),
+     r*Math.sin(phi)*Math.sin(theta)
+  );
+}
+
+// Pin drop animation queue
+const pinDropQueue=[];
+
+function addPinToGlobe(trip,animate){
+  // remove old if exists
+  if(pinMeshes[trip.id]){pinGroup.remove(pinMeshes[trip.id]);delete pinMeshes[trip.id];}
+
+  const surfacePos=latLngToVec3(trip.lat,trip.lng,1.0);
+  const pin=makePinMesh(0xcc2222);
+
+  // Orient pin: local "up" points outward from globe center
+  const up=surfacePos.clone().normalize();
+  const quat=new THREE.Quaternion();
+  quat.setFromUnitVectors(new THREE.Vector3(0,1,0),up);
+  pin.quaternion.copy(quat);
+
+  // Place pin tip on surface
+  const offset=surfacePos.clone().multiplyScalar(1.002);
+  pin.position.copy(offset);
+  pin.userData.tripId=trip.id;
+
+  // Clickable sphere for raycasting
+  const clickGeo=new THREE.SphereGeometry(0.045,8,8);
+  const clickMat=new THREE.MeshBasicMaterial({visible:false});
+  const clickMesh=new THREE.Mesh(clickGeo,clickMat);
+  clickMesh.position.copy(offset);
+  clickMesh.userData.tripId=trip.id;
+  pin.add(clickMesh);
+
+  pinGroup.add(pin);
+  pinMeshes[trip.id]=pin;
+
+  if(animate){
+    // Start pin high above surface, drop it
+    const finalPos=pin.position.clone();
+    const startPos=surfacePos.clone().normalize().multiplyScalar(1.8);
+    pin.position.copy(startPos);
+    pinDropQueue.push({pin,startPos,finalPos,t:0,dur:0.6});
+  }
+}
+
+function removePinFromGlobe(tripId){
+  if(pinMeshes[tripId]){pinGroup.remove(pinMeshes[tripId]);delete pinMeshes[tripId];}
+}
+
+function rebuildPins(){
+  Object.keys(pinMeshes).forEach(id=>{pinGroup.remove(pinMeshes[id]);delete pinMeshes[id];});
+  trips.forEach(t=>addPinToGlobe(t,false));
+}
+
+/* ===================================================
+   ORBIT + CONTROLS
+   =================================================== */
+let isDrag=false,prevM={x:0,y:0},rotVel={x:0,y:0};
+const globeRot={x:0.3,y:0};
+let autoRot=true,autoTimer=null,zoom=3.0;
+
+const raycaster=new THREE.Raycaster();
+
+canvas.addEventListener('mousedown',e=>{
+  isDrag=true;autoRot=false;clearTimeout(autoTimer);
+  prevM={x:e.clientX,y:e.clientY};rotVel={x:0,y:0};
+});
+
+canvas.addEventListener('mousemove',e=>{
+  if(isDrag){
+    const dx=e.clientX-prevM.x,dy=e.clientY-prevM.y;
+    rotVel.x=dy*0.003;rotVel.y=dx*0.003;
+    globeRot.x=Math.max(-1.4,Math.min(1.4,globeRot.x+rotVel.x));
+    globeRot.y+=rotVel.y;
+    prevM={x:e.clientX,y:e.clientY};
+  }
+
+  // Hover
+  const rect=canvas.getBoundingClientRect();
+  const x=((e.clientX-rect.left)/rect.width)*2-1;
+  const y=-((e.clientY-rect.top)/rect.height)*2+1;
+  raycaster.setFromCamera({x,y},camera);
+  const hits=raycaster.intersectObjects(pinGroup.children,true).filter(h=>h.object.userData.tripId||h.object.parent?.userData?.tripId);
+  const lbl=document.getElementById('hover-label');
+  if(hits.length){
+    const tid=hits[0].object.userData.tripId||hits[0].object.parent?.userData?.tripId;
+    const t=trips.find(x=>x.id===tid);
+    if(t){
+      document.getElementById('hlName').textContent=t.name;
+      document.getElementById('hlLoc').textContent=t.location;
+      lbl.style.left=(e.clientX+14)+'px';
+      lbl.style.top=(e.clientY-12)+'px';
+      lbl.style.opacity='1';
+      canvas.style.cursor='pointer';
+    }
+  } else {
+    lbl.style.opacity='0';
+    canvas.style.cursor=isDrag?'grabbing':'grab';
+  }
+});
+
+window.addEventListener('mouseup',()=>{
+  isDrag=false;
+  autoTimer=setTimeout(()=>{autoRot=true;},4000);
+});
+
+canvas.addEventListener('wheel',e=>{
+  e.preventDefault();
+  zoom=Math.max(1.5,Math.min(5.5,zoom+e.deltaY*0.004));
+  camera.position.setLength(zoom);
+},{passive:false});
+
+canvas.addEventListener('click',e=>{
+  if(Math.abs(rotVel.x)>0.004||Math.abs(rotVel.y)>0.004)return;
+  const rect=canvas.getBoundingClientRect();
+  const x=((e.clientX-rect.left)/rect.width)*2-1;
+  const y=-((e.clientY-rect.top)/rect.height)*2+1;
+  raycaster.setFromCamera({x,y},camera);
+  const hits=raycaster.intersectObjects(pinGroup.children,true);
+  for(const h of hits){
+    const tid=h.object.userData.tripId||(h.object.parent&&h.object.parent.userData&&h.object.parent.userData.tripId);
+    if(tid){openTripPanel(tid);return;}
+  }
+});
+
+// Touch
+canvas.addEventListener('touchstart',e=>{isDrag=true;autoRot=false;prevM={x:e.touches[0].clientX,y:e.touches[0].clientY};},{passive:true});
+canvas.addEventListener('touchmove',e=>{
+  const dx=e.touches[0].clientX-prevM.x,dy=e.touches[0].clientY-prevM.y;
+  globeRot.x=Math.max(-1.4,Math.min(1.4,globeRot.x+dy*0.004));
+  globeRot.y+=dx*0.004;
+  prevM={x:e.touches[0].clientX,y:e.touches[0].clientY};
+},{passive:true});
+canvas.addEventListener('touchend',()=>{isDrag=false;autoTimer=setTimeout(()=>autoRot=true,4000);});
+
+/* ===================================================
+   ANIMATE LOOP
+   =================================================== */
+let pulseT=0;
+function animate(){
+  requestAnimationFrame(animate);
+
+  if(autoRot&&!isDrag) globeRot.y+=0.0012;
+  if(!isDrag){rotVel.x*=0.88;rotVel.y*=0.88;globeRot.x=Math.max(-1.4,Math.min(1.4,globeRot.x+rotVel.x));globeRot.y+=rotVel.y;}
+
+  if(globeMesh){globeMesh.rotation.x=globeRot.x;globeMesh.rotation.y=globeRot.y;}
+  if(cloudMesh){cloudMesh.rotation.x=globeRot.x;cloudMesh.rotation.y=globeRot.y+pulseT*0.0003;}
+  pinGroup.rotation.x=globeRot.x;pinGroup.rotation.y=globeRot.y;
+
+  // Pin drop animations
+  for(let i=pinDropQueue.length-1;i>=0;i--){
+    const d=pinDropQueue[i];
+    d.t+=0.04/d.dur;
+    const ease=1-Math.pow(1-Math.min(d.t,1),3); // cubic ease out
+    d.pin.position.lerpVectors(d.startPos,d.finalPos,ease);
+    // bounce
+    if(d.t>=1){
+      d.pin.position.copy(d.finalPos);
+      pinDropQueue.splice(i,1);
+    }
+  }
+
+  // Pulse active pin
+  pulseT+=0.05;
+  if(activeTripId&&pinMeshes[activeTripId]){
+    const s=1+0.15*Math.sin(pulseT);
+    pinMeshes[activeTripId].scale.setScalar(s);
+  }
+
+  resize();
+  renderer.render(scene,camera);
+}
+
+function resize(){
+  const w=window.innerWidth,h=window.innerHeight;
+  if(canvas.width!==w*devicePixelRatio){
+    renderer.setSize(w,h,false);
+    camera.aspect=w/h;
+    camera.updateProjectionMatrix();
+  }
+}
+resize();animate();
+
+/* ===================================================
+   TRIP PANEL
+   =================================================== */
+function openTripPanel(id){
+  const t=trips.find(x=>x.id===id);
+  if(!t)return;
+  activeTripId=id;
+  document.getElementById('tpName').textContent=t.name;
+  document.getElementById('tpLocation').textContent=t.location;
+  document.getElementById('tpDate').textContent=t.date||'';
+  renderGrid(t);
+  document.getElementById('trip-panel').classList.add('open');
+  document.getElementById('globe-canvas').style.pointerEvents='none';
+  autoRot=false;
+  applyEditState();
+}
+function closeTripPanel(){
+  document.getElementById('trip-panel').classList.remove('open');
+  document.getElementById('globe-canvas').style.pointerEvents='';
+  activeTripId=null;
+  // reset active pin scale
+  Object.values(pinMeshes).forEach(p=>p.scale.setScalar(1));
+  autoRotateTimer=setTimeout(()=>{autoRot=true;},2000);
+}
+
+function renderGrid(t){
+  const grid=document.getElementById('tpGrid');
+  grid.innerHTML='';
+  // Section heading
+  const heading=document.createElement('div');
+  heading.style.cssText='grid-column:1/-1;margin-bottom:1rem;';
+  heading.innerHTML=`
+    <div style="font-family:Caveat,cursive;font-size:0.85rem;color:rgba(200,185,160,0.3);margin-bottom:0.3rem;letter-spacing:0.2em;">
+      ${(t.photos||[]).length} frame${(t.photos||[]).length!==1?'s':''}
+    </div>`;
+  grid.appendChild(heading);
+  (t.photos||[]).forEach((p,i)=>{
+    const div=document.createElement('div');div.className='tp-photo';
+    div.innerHTML=p.src
+      ?`<img src="${p.src}" alt="">
+        <div class="ph-cap">
+          <span class="ph-cap-text">${p.caption||''}</span>
+          ${p.description?`<span class="ph-cap-desc">${p.description}</span>`:''}
+          <span class="ph-cap-cam">${p.camera||''}</span>
+        </div>
+        <div class="ph-edit-ov" onclick="startPhotoEdit('${t.id}',${i})">
+          <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M11 4H4a2 2 0 00-2 2v14c0 1.1.9 2 2 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4z"/></svg>
+          <span>Edit / Remove</span>
+        </div>
+        <div class="pce" id="pce-${t.id}-${i}">
+          <input type="text" placeholder="Caption" id="pceCap-${t.id}-${i}" value="${p.caption||''}">
+          <textarea placeholder="Description (optional)" id="pceDesc-${t.id}-${i}" rows="2">${p.description||''}</textarea>
+          <input type="text" placeholder="Camera · Film" id="pceCam-${t.id}-${i}" value="${p.camera||''}">
+          <div class="pce-btns">
+            <button class="pce-btn" onclick="savePhotoMeta('${t.id}',${i})">Save</button>
+            <button class="pce-btn danger" onclick="removePhoto('${t.id}',${i})">Remove</button>
+            <button class="pce-btn" onclick="closePce('${t.id}',${i})">Cancel</button>
+          </div>
+        </div>`
+      :`<div class="ph-placeholder"><svg viewBox="0 0 24 24" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><span>No photo</span></div>`;
+
+    if(p.src){div.addEventListener('click',ev=>{if(editMode||ev.target.closest('.ph-edit-ov,.pce'))return;openLightbox(t,i);});}
+    grid.appendChild(div);
+  });
+
+  if(editMode){
+    const tile=document.createElement('div');tile.className='add-tile';
+    tile.innerHTML=`<svg viewBox="0 0 24 24" stroke-width="1.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span>Add Photo</span>`;
+    tile.addEventListener('click',()=>pickPhoto(t.id));
+    grid.appendChild(tile);
+  }
+}
+
+function startPhotoEdit(tid,idx){const el=document.getElementById(`pce-${tid}-${idx}`);if(el)el.classList.add('on');}
+function closePce(tid,idx){const el=document.getElementById(`pce-${tid}-${idx}`);if(el)el.classList.remove('on');}
+
+function savePhotoMeta(tid,idx){
+  const t=trips.find(x=>x.id===tid);if(!t||!t.photos[idx])return;
+  t.photos[idx].caption=document.getElementById(`pceCap-${tid}-${idx}`).value;
+  t.photos[idx].description=document.getElementById(`pceDesc-${tid}-${idx}`).value;
+  t.photos[idx].camera=document.getElementById(`pceCam-${tid}-${idx}`).value;
+  saveTrips();renderGrid(t);applyEditState();
+}
+function removePhoto(tid,idx){
+  if(!confirm('Remove this photo?'))return;
+  const t=trips.find(x=>x.id===tid);if(!t)return;
+  t.photos.splice(idx,1);saveTrips();renderGrid(t);applyEditState();
+}
+function pickPhoto(tid){
+  pendingPhotoTrip=tid;
+  const inp=document.getElementById('photo-file-input');inp.value='';
+  inp.onchange=function(){
+    if(!this.files[0])return;
+    const r=new FileReader();
+    r.onload=ev=>{
+      const t=trips.find(x=>x.id===pendingPhotoTrip);if(!t)return;
+      t.photos=t.photos||[];
+      t.photos.push({src:ev.target.result,caption:'',description:'',camera:''});
+      saveTrips();renderGrid(t);applyEditState();
+    };
+    r.readAsDataURL(this.files[0]);
+  };
+  inp.click();
+}
+
+function savePanelText(){
+  if(!activeTripId)return;
+  const t=trips.find(x=>x.id===activeTripId);if(!t)return;
+  t.name=document.getElementById('tpName').innerText.trim();
+  t.location=document.getElementById('tpLocation').innerText.trim();
+  t.date=document.getElementById('tpDate').innerText.trim();
+  saveTrips();
+}
+['tpName','tpLocation','tpDate'].forEach(id=>document.getElementById(id).addEventListener('blur',savePanelText));
+document.getElementById('tpClose').addEventListener('click',closeTripPanel);
+document.getElementById('tpDel').addEventListener('click',()=>{
+  if(!activeTripId||!confirm('Remove this entire trip?'))return;
+  removePinFromGlobe(activeTripId);
+  trips=trips.filter(t=>t.id!==activeTripId);
+  saveTrips();closeTripPanel();updateEmpty();
+});
+
+function updateEmpty(){document.getElementById('empty').classList.toggle('on',trips.length===0);}
+
+/* ===================================================
+   LIGHTBOX
+   =================================================== */
+function openLightbox(t,i){lbPhotos=t.photos;lbIdx=i;showLb();document.getElementById('lb').classList.add('on');}
+function showLb(){
+  const p=lbPhotos[lbIdx];
+  document.getElementById('lbImg').src=p.src;
+  document.getElementById('lbCap').textContent=p.caption||'';
+  const descEl=document.getElementById('lbDesc');
+  if(descEl)descEl.textContent=p.description||'';
+  document.getElementById('lbCam').textContent=p.camera||'';
+}
+document.getElementById('lbX').addEventListener('click',()=>document.getElementById('lb').classList.remove('on'));
+document.getElementById('lbPrev').addEventListener('click',()=>{lbIdx=(lbIdx-1+lbPhotos.length)%lbPhotos.length;showLb();});
+document.getElementById('lbNext').addEventListener('click',()=>{lbIdx=(lbIdx+1)%lbPhotos.length;showLb();});
+document.getElementById('lb').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove('on');});
+document.addEventListener('keydown',e=>{
+  if(document.getElementById('trip-panel').classList.contains('open')&&!document.getElementById('lb').classList.contains('on')){
+    if(e.key==='Escape')closeTripPanel();
+  }
+  if(!document.getElementById('lb').classList.contains('on'))return;
+  if(e.key==='ArrowLeft'){lbIdx=(lbIdx-1+lbPhotos.length)%lbPhotos.length;showLb();}
+  if(e.key==='ArrowRight'){lbIdx=(lbIdx+1)%lbPhotos.length;showLb();}
+  if(e.key==='Escape')document.getElementById('lb').classList.remove('on');
+});
+
+/* ===================================================
+   EDIT MODE — password protected
+   =================================================== */
+function applyEditState(){
+  // Panel text fields — only editable in emergencies; use Edit Trip modal instead
+  ['tpName','tpLocation','tpDate'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.contentEditable='false'; // always false — use modal
+  });
+  if(activeTripId){const t=trips.find(x=>x.id===activeTripId);if(t)renderGrid(t);}
+}
+
+document.getElementById('editToggle').addEventListener('click',()=>{
+  if(editMode){
+    editMode=false;document.body.classList.remove('edit-mode');
+    document.getElementById('editToggle').textContent='✎ Edit';document.getElementById('editToggle').classList.remove('on');
+    document.getElementById('addTripBtn').style.display='none';document.getElementById('edit-bar').classList.remove('on');
+    applyEditState();
+  } else {
+    document.getElementById('pw-modal').classList.add('on');
+    document.getElementById('pwIn').value='';document.getElementById('pwErr').style.display='none';
+    setTimeout(()=>document.getElementById('pwIn').focus(),80);
+  }
+});
+
+function unlockEdit(){
+  if(document.getElementById('pwIn').value===EDIT_PASSWORD){
+    document.getElementById('pw-modal').classList.remove('on');
+    editMode=true;document.body.classList.add('edit-mode');
+    document.getElementById('editToggle').textContent='Exit Edit';document.getElementById('editToggle').classList.add('on');
+    document.getElementById('addTripBtn').style.display='block';document.getElementById('edit-bar').classList.add('on');
+    applyEditState();
+  } else {
+    document.getElementById('pwErr').style.display='block';document.getElementById('pwIn').value='';document.getElementById('pwIn').focus();
+  }
+}
+document.getElementById('pwOk').addEventListener('click',unlockEdit);
+document.getElementById('pwCancel').addEventListener('click',()=>document.getElementById('pw-modal').classList.remove('on'));
+document.getElementById('pwIn').addEventListener('keydown',e=>{if(e.key==='Enter')unlockEdit();if(e.key==='Escape')document.getElementById('pw-modal').classList.remove('on');});
+document.getElementById('pw-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove('on');});
+
+/* ===================================================
+   ADD TRIP
+   =================================================== */
+document.getElementById('addTripBtn').addEventListener('click',()=>{
+  document.getElementById('at-modal').classList.add('on');
+  ['atName','atSearch','atLat','atLng','atLoc','atDate'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('atResults').innerHTML='';document.getElementById('atResults').style.display='none';
+  setTimeout(()=>document.getElementById('atName').focus(),80);
+});
+
+document.getElementById('atSearch').addEventListener('input',function(){
+  const q=this.value.toLowerCase().trim();
+  const res=document.getElementById('atResults');
+  if(q.length<2){res.style.display='none';return;}
+  const matches=CITIES.filter(c=>c.n.toLowerCase().includes(q)||c.c.toLowerCase().includes(q)).slice(0,8);
+  if(!matches.length){res.style.display='none';return;}
+  res.style.display='block';
+  res.innerHTML=matches.map(c=>`<div class="at-opt" data-lat="${c.lat}" data-lng="${c.lng}" data-n="${c.n}" data-c="${c.c}">${c.n} <span style="opacity:0.45">— ${c.c}</span></div>`).join('');
+  res.querySelectorAll('.at-opt').forEach(el=>{
+    el.addEventListener('click',function(){
+      document.getElementById('atLat').value=this.dataset.lat;
+      document.getElementById('atLng').value=this.dataset.lng;
+      document.getElementById('atSearch').value=this.dataset.n+', '+this.dataset.c;
+      if(!document.getElementById('atLoc').value)document.getElementById('atLoc').value=this.dataset.n+', '+this.dataset.c;
+      document.getElementById('atResults').style.display='none';
+    });
+  });
+});
+
+document.getElementById('atOk').addEventListener('click',()=>{
+  const name=document.getElementById('atName').value.trim();
+  const lat=parseFloat(document.getElementById('atLat').value);
+  const lng=parseFloat(document.getElementById('atLng').value);
+  const loc=document.getElementById('atLoc').value.trim();
+  const date=document.getElementById('atDate').value.trim();
+  if(!name){alert('Please enter a trip name.');return;}
+  if(isNaN(lat)||isNaN(lng)){alert('Please select a city or enter coordinates.');return;}
+
+  const trip={id:'trip_'+Date.now(),name,lat,lng,location:loc||name,date,photos:[]};
+  trips.push(trip);
+  saveTrips();
+  addPinToGlobe(trip,true); // animate the drop
+  updateEmpty();
+  document.getElementById('at-modal').classList.remove('on');
+
+  // Spin globe to new pin and open panel
+  setTimeout(()=>{
+    const tY=(-lng-180)*(Math.PI/180)+Math.PI;
+    globeRot.y=tY;
+    globeRot.x=-lat*(Math.PI/180)*0.55;
+    openTripPanel(trip.id);
+  },400);
+});
+
+document.getElementById('atCancel').addEventListener('click',()=>document.getElementById('at-modal').classList.remove('on'));
+document.getElementById('at-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.classList.remove('on');});
+
+// Hint fade
+setTimeout(()=>{const h=document.getElementById('globe-hint');if(h)h.style.opacity='0';},5000);
+
+/* ===================================================
+   INIT
+   =================================================== */
+loadTrips();
+// Pins added after textures load (inside onTexLoad callback above)
+updateEmpty();
+
+/* ── EDIT TRIP ── */
+document.getElementById('tpEditBtn').addEventListener('click',()=>{
+  const t=trips.find(x=>x.id===activeTripId);
+  if(!t)return;
+  document.getElementById('etName').value=t.name;
+  document.getElementById('etLocation').value=t.location;
+  document.getElementById('etDate').value=t.date||'';
+  document.getElementById('etLat').value=t.lat;
+  document.getElementById('etLng').value=t.lng;
+  document.getElementById('etCoordsHint').textContent='Current: '+t.lat+', '+t.lng;
+  document.getElementById('et-modal').style.display='flex';
+  setTimeout(()=>document.getElementById('etName').focus(),80);
+});
+document.getElementById('etSave').addEventListener('click',()=>{
+  const t=trips.find(x=>x.id===activeTripId);
+  if(!t)return;
+  t.name=document.getElementById('etName').value.trim()||t.name;
+  t.location=document.getElementById('etLocation').value.trim()||t.location;
+  t.date=document.getElementById('etDate').value.trim();
+  const newLat=parseFloat(document.getElementById('etLat').value);
+  const newLng=parseFloat(document.getElementById('etLng').value);
+  const coordsChanged=!isNaN(newLat)&&!isNaN(newLng)&&(newLat!==t.lat||newLng!==t.lng);
+  if(!isNaN(newLat)) t.lat=newLat;
+  if(!isNaN(newLng)) t.lng=newLng;
+  saveTrips();
+  // Rebuild pin if coords changed
+  if(coordsChanged){
+    addPinToGlobe(t,false);
+    // Spin globe to new position
+    const tY=(-t.lng-180)*(Math.PI/180)+Math.PI;
+    globeRot.y=tY;
+    globeRot.x=-t.lat*(Math.PI/180)*0.55;
+  }
+  // Update panel header live
+  document.getElementById('tpName').textContent=t.name;
+  document.getElementById('tpLocation').textContent=t.location;
+  document.getElementById('tpDate').textContent=t.date;
+  document.getElementById('et-modal').style.display='none';
+});
+document.getElementById('etCancel').addEventListener('click',()=>{document.getElementById('et-modal').style.display='none';});
+document.getElementById('et-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)e.currentTarget.style.display='none';});
+document.querySelectorAll('#etName,#etLocation,#etDate,#etLat,#etLng').forEach(el=>{
+  el.addEventListener('keydown',e=>{if(e.key==='Escape')document.getElementById('et-modal').style.display='none';});
+});
+document.getElementById('etDelete').addEventListener('click',()=>{
+  if(!activeTripId)return;
+  document.getElementById('et-modal').style.display='none';
+  if(!confirm('Delete \"'+document.getElementById('etName').value+'\" and all its photos? This cannot be undone.'))return;
+  removePinFromGlobe(activeTripId);
+  trips=trips.filter(t=>t.id!==activeTripId);
+  saveTrips();
+  closeTripPanel();
+  updateEmpty();
+});
+
+window.addEventListener('resize',resize);
+</script>
+
+</body>
+</html>
