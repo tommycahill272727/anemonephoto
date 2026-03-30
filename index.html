@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anemone Photo</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Oswald:wght@700&family=Lora:ital,wght@0,400;1,400;1,600&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --paper:#e8dfc8;--paper2:#dfd5b8;--paper3:#f2ebe0;--aged:#c9bc9e;
+  --ink:#1c1510;--ink2:#2e261a;--faded:#7a6e5a;
+  --red:#8b2222;--red2:#a33030;
+  --stamp-r:rgba(139,34,34,0.75);--stamp-b:rgba(30,50,100,0.7);--olive:#4a4a2e;
+}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--paper);color:var(--ink);font-family:'Lora',serif;overflow-x:hidden;
+  background-image:repeating-linear-gradient(transparent,transparent 31px,rgba(160,140,100,0.18) 31px,rgba(160,140,100,0.18) 32px);
+  background-size:100% 32px;
+}
+body::before{content:'';position:fixed;inset:0;z-index:9998;pointer-events:none;opacity:0.07;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:512px;}
+
+/* EDIT MODE */
+.edit-mode [contenteditable]{outline:none;border-bottom:2px dashed rgba(139,34,34,0.5);cursor:text;transition:background 0.15s;position:relative;}
+.edit-mode [contenteditable]:hover{background:rgba(139,34,34,0.08);}
+.edit-mode [contenteditable]:focus{background:rgba(139,34,34,0.06);border-bottom-color:var(--red);}
+.edit-toolbar{position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;display:flex;gap:0.6rem;align-items:center;background:var(--ink2);padding:0.7rem 1rem;border-top:2px solid var(--red);box-shadow:0 4px 20px rgba(0,0,0,0.4);}
+.edit-toolbar button{font-family:'Special Elite',monospace;font-size:0.52rem;letter-spacing:0.25em;text-transform:uppercase;padding:0.4rem 0.8rem;border:1px solid rgba(232,224,208,0.2);color:var(--aged);background:transparent;cursor:pointer;transition:all 0.2s;}
+.edit-toolbar button:hover{border-color:var(--paper);color:var(--paper);}
+.edit-toolbar button.primary{border-color:var(--red2);color:var(--paper3);background:var(--red);}
+.toolbar-label{font-family:'Caveat',cursive;font-size:0.9rem;color:rgba(232,224,208,0.4);}
+
+/* COFFEE */
+.coffee{position:absolute;border-radius:50%;pointer-events:none;background:radial-gradient(ellipse at 40% 40%,rgba(90,55,20,0.09),rgba(90,55,20,0.04) 45%,transparent 70%);border:1px solid rgba(90,55,20,0.07);}
+.washi{position:absolute;height:22px;transform-origin:center;}
+.washi-1{top:2rem;right:8rem;width:120px;background:repeating-linear-gradient(90deg,rgba(155,100,50,0.3) 0,rgba(155,100,50,0.3) 4px,rgba(185,130,80,0.2) 4px,rgba(185,130,80,0.2) 8px);transform:rotate(-6deg);}
+.washi-2{top:1rem;left:200px;width:90px;background:rgba(100,130,80,0.2);border-top:1px solid rgba(100,130,80,0.3);border-bottom:1px solid rgba(100,130,80,0.3);transform:rotate(3deg);}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:1000;background:var(--ink2);padding:0.8rem 2rem;display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid var(--red);}
+.logo{font-family:'Oswald',sans-serif;font-weight:700;font-size:1.05rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--paper3);text-decoration:none;}
+.logo em{color:var(--red2);font-style:normal;}
+.nav-links{display:flex;gap:2.5rem;list-style:none;}
+.nav-links a{font-family:'Caveat',cursive;font-size:1.05rem;color:var(--aged);text-decoration:none;transition:color 0.2s;}
+.nav-links a:hover{color:var(--paper3);}
+.nav-edit-btn{font-family:'Special Elite',monospace;font-size:0.5rem;letter-spacing:0.25em;text-transform:uppercase;padding:0.3rem 0.7rem;border:1px solid rgba(139,34,34,0.4);color:rgba(232,224,208,0.5);background:transparent;cursor:pointer;transition:all 0.2s;margin-left:1rem;}
+.nav-edit-btn:hover,.nav-edit-btn.on{border-color:var(--red2);color:var(--paper3);background:rgba(139,34,34,0.3);}
+
+/* COVER */
+.cover{min-height:100vh;position:relative;padding:4rem 3rem 3rem;display:flex;flex-direction:column;overflow:hidden;}
+.cover::before{content:'';position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(160,140,100,0.12) 1px,transparent 1px),linear-gradient(90deg,rgba(160,140,100,0.12) 1px,transparent 1px);background-size:80px 80px;}
+.cover::after{content:'';position:absolute;top:0;bottom:0;left:88px;width:2px;background:rgba(139,34,34,0.25);pointer-events:none;}
+.cs1{top:12%;right:8%;width:140px;height:130px;}
+.cs2{bottom:20%;left:5%;width:90px;height:80px;}
+.cs3{top:50%;right:25%;width:60px;height:55px;}
+.cover-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:3rem;padding-left:70px;}
+.stamp{display:inline-block;border:2.5px solid;padding:0.4rem 0.8rem;font-family:'Special Elite',monospace;font-size:0.6rem;letter-spacing:0.3em;text-transform:uppercase;transform:rotate(-4deg);}
+.stamp-red{color:var(--stamp-r);border-color:var(--stamp-r);}
+.stamp-blue{color:var(--stamp-b);border-color:var(--stamp-b);}
+
+/* PHOTO CLUSTER */
+.photo-cluster{position:absolute;right:2.5rem;top:6rem;width:44%;height:520px;}
+.film-print{position:absolute;background:#0d0b08;cursor:pointer;}
+.fp1{width:215px;top:0;right:10px;z-index:3;transform:rotate(3.5deg);padding:5px 5px 18px;box-shadow:2px 3px 0 rgba(0,0,0,0.4),4px 5px 0 rgba(0,0,0,0.15),0 8px 24px rgba(0,0,0,0.35);transition:transform 0.3s;}
+.fp1:hover{transform:rotate(3.5deg) scale(1.04);}
+.fp2{width:190px;top:40px;right:230px;z-index:2;transform:rotate(-5deg);padding:5px 5px 16px;box-shadow:2px 3px 0 rgba(0,0,0,0.4),0 8px 20px rgba(0,0,0,0.3);transition:transform 0.3s;}
+.fp2:hover{transform:rotate(-5deg) scale(1.04);}
+.fp3{width:200px;top:230px;right:30px;z-index:4;transform:rotate(1.5deg);padding:5px 5px 18px;box-shadow:2px 3px 0 rgba(0,0,0,0.4),0 8px 22px rgba(0,0,0,0.32);transition:transform 0.3s;}
+.fp3:hover{transform:rotate(1.5deg) scale(1.04);}
+.fp4{width:175px;top:260px;right:238px;z-index:1;transform:rotate(-3deg);padding:5px 5px 15px;box-shadow:2px 3px 0 rgba(0,0,0,0.35),0 6px 18px rgba(0,0,0,0.28);transition:transform 0.3s;}
+.fp4:hover{transform:rotate(-3deg) scale(1.04);}
+.fp-image{position:relative;width:100%;overflow:hidden;background:#111009;display:flex;align-items:center;justify-content:center;cursor:default;}
+.edit-mode .fp-image{cursor:pointer;}
+.fp1 .fp-image{height:165px;}.fp2 .fp-image{height:148px;}.fp3 .fp-image{height:156px;}.fp4 .fp-image{height:136px;}
+.fp-image img{width:100%;height:100%;object-fit:cover;display:block;}
+.fp-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;color:rgba(200,185,160,0.3);gap:0.4rem;cursor:pointer;transition:color 0.2s;pointer-events:none;}
+.fp-image:hover .fp-placeholder{color:rgba(200,185,160,0.6);}
+.fp-placeholder svg{width:28px;height:28px;stroke:currentColor;fill:none;}
+.fp-placeholder span{font-family:'Special Elite',monospace;font-size:0.42rem;letter-spacing:0.2em;text-transform:uppercase;}
+.fp-curl{position:absolute;bottom:0;right:0;width:22px;height:22px;background:linear-gradient(225deg,var(--paper) 45%,rgba(0,0,0,0.2) 45%,rgba(0,0,0,0.1) 50%,transparent 50%);z-index:6;pointer-events:none;}
+.fp-tape{position:absolute;top:-9px;left:50%;transform:translateX(-50%);width:52px;height:15px;background:rgba(240,220,140,0.52);border-top:1px solid rgba(200,185,80,0.35);border-bottom:1px solid rgba(200,185,80,0.35);z-index:10;pointer-events:none;}
+.fp-pin{position:absolute;top:-5px;left:50%;transform:translateX(-50%);width:10px;height:10px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#e0d0b0,#8a6a3a);box-shadow:0 1px 3px rgba(0,0,0,0.5);z-index:10;pointer-events:none;}
+.fp-number{position:absolute;bottom:2px;left:6px;font-family:'Special Elite',monospace;font-size:0.44rem;letter-spacing:0.15em;color:rgba(200,185,160,0.4);z-index:5;pointer-events:none;}
+
+/* COVER TITLE */
+.cover-title{padding-left:70px;margin-bottom:2rem;position:relative;z-index:1;}
+.journal-no{font-family:'Caveat',cursive;font-size:0.95rem;color:var(--faded);margin-bottom:0.5rem;}
+.cover-h1{font-family:'Oswald',sans-serif;font-weight:700;font-size:clamp(5rem,14vw,11rem);line-height:0.82;letter-spacing:0.02em;text-transform:uppercase;color:var(--ink);}
+.scratch{color:var(--red);position:relative;}
+.scratch::after{content:'';position:absolute;bottom:-6px;left:0;right:0;height:4px;background:var(--red);clip-path:polygon(0 60%,2% 0,5% 80%,8% 20%,12% 70%,16% 10%,20% 60%,25% 0%,30% 50%,35% 10%,40% 65%,45% 5%,50% 55%,55% 5%,60% 70%,65% 10%,70% 60%,75% 0%,80% 70%,85% 20%,90% 65%,95% 10%,100% 50%,100% 100%,0 100%);}
+.cover-subtitle{font-family:'Caveat',cursive;font-size:1.4rem;color:var(--faded);margin-top:1.2rem;transform:rotate(-1deg);display:inline-block;}
+.cover-info{margin-top:auto;padding-left:70px;display:flex;gap:4rem;align-items:flex-end;position:relative;z-index:1;}
+.info-block .info-label{font-family:'Special Elite',monospace;font-size:0.55rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--faded);margin-bottom:0.2rem;}
+.info-block .info-val{font-family:'Caveat',cursive;font-size:1.1rem;color:var(--ink);}
+
+/* TORN */
+.torn{width:100%;height:40px;position:relative;overflow:hidden;flex-shrink:0;}
+.torn-top::after{content:'';position:absolute;bottom:0;left:0;right:0;height:40px;background:var(--ink);clip-path:polygon(0 60%,1% 20%,2% 80%,3% 30%,4% 75%,5% 15%,6% 65%,7% 35%,8% 70%,9% 10%,10% 80%,11% 40%,12% 70%,13% 20%,14% 85%,15% 40%,16% 75%,17% 25%,18% 65%,19% 30%,20% 80%,21% 15%,22% 75%,23% 40%,24% 65%,25% 10%,26% 80%,27% 35%,28% 70%,29% 20%,30% 85%,31% 45%,32% 70%,33% 15%,34% 80%,35% 40%,36% 65%,37% 25%,38% 75%,39% 30%,40% 80%,41% 20%,42% 70%,43% 35%,44% 65%,45% 15%,46% 85%,47% 40%,48% 60%,49% 20%,50% 75%,51% 35%,52% 70%,53% 15%,54% 80%,55% 40%,56% 65%,57% 25%,58% 75%,59% 30%,60% 80%,61% 20%,62% 70%,63% 35%,64% 65%,65% 15%,66% 80%,67% 40%,68% 70%,69% 20%,70% 85%,71% 45%,72% 65%,73% 10%,74% 75%,75% 35%,76% 70%,77% 20%,78% 80%,79% 40%,80% 65%,81% 25%,82% 75%,83% 30%,84% 80%,85% 15%,86% 75%,87% 40%,88% 65%,89% 20%,90% 80%,91% 35%,92% 70%,93% 15%,94% 80%,95% 45%,96% 65%,97% 20%,98% 75%,99% 30%,100% 60%,100% 100%,0 100%);}
+.torn-bottom{background:var(--ink);}
+.torn-bottom::after{content:'';position:absolute;bottom:0;left:0;right:0;height:40px;background:var(--paper2);clip-path:polygon(0 40%,1% 80%,2% 20%,3% 70%,4% 25%,5% 85%,6% 35%,7% 65%,8% 30%,9% 90%,10% 20%,11% 60%,12% 30%,13% 80%,14% 15%,15% 60%,16% 25%,17% 75%,18% 35%,19% 70%,20% 20%,21% 85%,22% 25%,23% 60%,24% 35%,25% 90%,26% 20%,27% 65%,28% 30%,29% 80%,30% 15%,31% 55%,32% 30%,33% 85%,34% 20%,35% 60%,36% 35%,37% 75%,38% 25%,39% 70%,40% 20%,41% 80%,42% 30%,43% 65%,44% 35%,45% 85%,46% 15%,47% 60%,48% 40%,49% 80%,50% 25%,51% 65%,52% 30%,53% 85%,54% 20%,55% 60%,56% 35%,57% 75%,58% 25%,59% 70%,60% 20%,61% 80%,62% 30%,63% 65%,64% 35%,65% 85%,66% 20%,67% 60%,68% 30%,69% 80%,70% 15%,71% 55%,72% 35%,73% 90%,74% 25%,75% 65%,76% 30%,77% 80%,78% 20%,79% 60%,80% 35%,81% 75%,82% 25%,83% 70%,84% 20%,85% 85%,86% 25%,87% 60%,88% 35%,89% 80%,90% 20%,91% 65%,92% 30%,93% 85%,94% 20%,95% 55%,96% 35%,97% 80%,98% 25%,99% 70%,100% 40%,100% 100%,0 100%);}
+
+/* DARK SECTION */
+.dark-section{background:var(--ink);padding:4rem 3rem;position:relative;overflow:hidden;}
+.dark-section::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:0.04;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:512px;}
+.dark-section::after{content:'';position:absolute;top:0;bottom:0;left:88px;width:1px;background:rgba(139,34,34,0.2);pointer-events:none;}
+.ds-label{font-family:'Caveat',cursive;font-size:1rem;color:rgba(232,224,208,0.35);margin-bottom:0.5rem;padding-left:70px;}
+.ds-title{font-family:'Oswald',sans-serif;font-weight:700;font-size:clamp(2.5rem,5vw,4rem);text-transform:uppercase;letter-spacing:0.03em;color:var(--paper3);padding-left:70px;line-height:0.9;margin-bottom:2rem;}
+.ds-title em{color:var(--red2);font-style:normal;}
+
+/* PHOTO GRID */
+.photo-grid{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:0;padding:0 3rem 3rem;}
+.gprint{position:relative;background:#0d0b08;padding:5px 5px 22px;box-shadow:2px 3px 0 rgba(0,0,0,0.45),4px 6px 0 rgba(0,0,0,0.15),0 10px 28px rgba(0,0,0,0.4);margin:1.2rem;transition:transform 0.35s cubic-bezier(0.2,1,0.3,1),box-shadow 0.35s;}
+.gprint:hover{box-shadow:4px 6px 0 rgba(0,0,0,0.5),0 16px 40px rgba(0,0,0,0.5);z-index:10;}
+.gp1{transform:rotate(-2.5deg);grid-row:1/3;align-self:start;margin-top:2.5rem;}.gp1:hover{transform:rotate(-2.5deg) scale(1.03);}
+.gp2{transform:rotate(1.8deg);}.gp2:hover{transform:rotate(1.8deg) scale(1.03);}
+.gp3{transform:rotate(-1.2deg);}.gp3:hover{transform:rotate(-1.2deg) scale(1.03);}
+.gp4{transform:rotate(2.2deg);grid-column:2;}.gp4:hover{transform:rotate(2.2deg) scale(1.03);}
+.gp5{transform:rotate(-0.7deg);}.gp5:hover{transform:rotate(-0.7deg) scale(1.03);}
+.gp-img-wrap{position:relative;width:100%;overflow:hidden;background:#111009;display:flex;align-items:center;justify-content:center;cursor:default;}
+.edit-mode .gp-img-wrap{cursor:pointer;}
+.gp1 .gp-img-wrap{height:370px;}.gp2 .gp-img-wrap,.gp3 .gp-img-wrap,.gp4 .gp-img-wrap,.gp5 .gp-img-wrap{height:200px;}
+.gp-img-wrap img{width:100%;height:100%;object-fit:cover;display:block;}
+.gp-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;color:rgba(200,185,160,0.08);gap:0.4rem;cursor:default;transition:color 0.2s;}
+.edit-mode .gp-placeholder{color:rgba(200,185,160,0.3);cursor:pointer;}
+.edit-mode .gp-placeholder:hover{color:rgba(200,185,160,0.6);}
+.gp-placeholder svg{width:32px;height:32px;stroke:currentColor;fill:none;}
+.gp-placeholder span{font-family:'Special Elite',monospace;font-size:0.42rem;letter-spacing:0.2em;text-transform:uppercase;}
+.gp-tape{position:absolute;top:-8px;left:50%;transform:translateX(-50%);width:48px;height:14px;background:rgba(240,220,140,0.48);border-top:1px solid rgba(200,185,80,0.3);border-bottom:1px solid rgba(200,185,80,0.3);z-index:10;pointer-events:none;}
+.gp-num{position:absolute;bottom:3px;left:7px;font-family:'Special Elite',monospace;font-size:0.44rem;letter-spacing:0.18em;color:rgba(200,185,160,0.35);z-index:5;}
+.gp-curl{position:absolute;bottom:0;right:0;width:20px;height:20px;background:linear-gradient(225deg,rgba(30,20,10,0.8) 45%,rgba(0,0,0,0.2) 45%,rgba(0,0,0,0.08) 50%,transparent 50%);z-index:6;pointer-events:none;}
+.gp-caption{padding:6px 4px 0;font-family:'Caveat',cursive;font-size:0.9rem;color:rgba(220,210,190,0.7);line-height:1.3;}
+.ds-portfolio-link{padding-left:70px;padding-bottom:1rem;}
+.ds-portfolio-link a{font-family:'Special Elite',monospace;font-size:0.6rem;letter-spacing:0.4em;text-transform:uppercase;color:rgba(232,224,208,0.45);text-decoration:none;border-bottom:1px solid rgba(139,34,34,0.4);padding-bottom:2px;transition:color 0.2s;}
+.ds-portfolio-link a:hover{color:rgba(232,224,208,0.8);}
+
+/* JOURNAL PAGE */
+.journal-page{background:var(--paper3);padding:4rem 3rem 4rem 100px;position:relative;overflow:hidden;border-bottom:1px solid var(--aged);}
+.journal-page::before{content:'';position:absolute;top:0;bottom:0;left:88px;width:2px;background:rgba(139,34,34,0.2);pointer-events:none;}
+.journal-page::after{content:'';position:absolute;inset:0;pointer-events:none;background-image:repeating-linear-gradient(transparent,transparent 31px,rgba(160,140,100,0.15) 31px,rgba(160,140,100,0.15) 32px);background-size:100% 32px;}
+.entry{position:relative;z-index:1;margin-bottom:3rem;}
+.entry-date{font-family:'Special Elite',monospace;font-size:0.65rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--faded);margin-bottom:0.3rem;}
+.entry-hed{font-family:'Oswald',sans-serif;font-weight:700;font-size:clamp(2rem,4vw,3.2rem);text-transform:uppercase;letter-spacing:0.03em;color:var(--ink);line-height:0.9;margin-bottom:0.8rem;}
+.entry-hed em{color:var(--red);font-style:normal;}
+.entry-body{font-family:'Lora',serif;font-style:italic;font-size:1rem;color:var(--ink2);line-height:2;max-width:55ch;}
+.margin-note{position:absolute;right:3rem;top:0;width:160px;font-family:'Caveat',cursive;font-size:0.9rem;color:var(--faded);line-height:1.5;transform:rotate(2deg);border-left:2px solid rgba(139,34,34,0.3);padding-left:0.6rem;z-index:2;}
+.stamps-row{display:flex;gap:2rem;align-items:center;margin:2rem 0;flex-wrap:wrap;position:relative;z-index:2;}
+.pstamp{display:flex;flex-direction:column;align-items:center;justify-content:center;width:90px;height:90px;border-radius:50%;border:2.5px solid;padding:0.5rem;transform:rotate(var(--rot,0deg));opacity:0.75;}
+.pstamp .ps-country{font-family:'Special Elite',monospace;font-size:0.45rem;letter-spacing:0.25em;text-transform:uppercase;text-align:center;line-height:1.4;}
+.pstamp .ps-date{font-family:'Special Elite',monospace;font-size:0.5rem;letter-spacing:0.1em;margin-top:2px;}
+.ps-red{color:var(--stamp-r);border-color:var(--stamp-r);}
+.ps-blue{color:var(--stamp-b);border-color:var(--stamp-b);}
+.ps-olive{color:var(--olive);border-color:var(--olive);opacity:0.6;}
+
+/* CONTACT */
+.contact-page{background:var(--paper2);padding:5rem 3rem 5rem 100px;position:relative;overflow:hidden;}
+.contact-page::before{content:'';position:absolute;top:0;bottom:0;left:88px;width:2px;background:rgba(139,34,34,0.2);pointer-events:none;}
+.contact-page::after{content:'';position:absolute;inset:0;pointer-events:none;background-image:repeating-linear-gradient(transparent,transparent 31px,rgba(160,140,100,0.12) 31px,rgba(160,140,100,0.12) 32px);background-size:100% 32px;}
+.contact-inner{position:relative;z-index:1;max-width:700px;}
+.contact-h{font-family:'Oswald',sans-serif;font-weight:700;font-size:clamp(2rem,4vw,3rem);text-transform:uppercase;letter-spacing:0.03em;color:var(--ink);line-height:0.9;margin-bottom:1.5rem;}
+.contact-h em{color:var(--red);font-style:normal;}
+.contact-rule{width:50px;height:3px;background:var(--red);margin-bottom:2rem;}
+.contact-lines{display:flex;flex-direction:column;gap:1.5rem;}
+.contact-line{display:flex;align-items:baseline;gap:1.5rem;border-bottom:1px solid rgba(160,140,100,0.2);padding-bottom:1.5rem;}
+.cl-label{font-family:'Special Elite',monospace;font-size:0.55rem;letter-spacing:0.35em;text-transform:uppercase;color:var(--faded);min-width:90px;}
+.cl-val{font-family:'Caveat',cursive;font-size:1.3rem;color:var(--ink);}
+
+/* FOOTER */
+footer{background:var(--ink2);border-top:3px solid var(--red);padding:3rem 3rem 3rem 100px;position:relative;}
+footer::before{content:'';position:absolute;top:0;bottom:0;left:88px;width:2px;background:rgba(139,34,34,0.15);pointer-events:none;}
+.foot-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2.5rem;}
+.foot-brand{font-family:'Oswald',sans-serif;font-weight:700;font-size:2.5rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--paper3);line-height:0.9;}
+.foot-brand em{color:var(--red2);font-style:normal;}
+.foot-scrawl{font-family:'Caveat',cursive;font-size:1rem;color:rgba(232,224,208,0.25);text-align:right;transform:rotate(-3deg);display:inline-block;max-width:200px;line-height:1.5;}
+.foot-links{display:flex;gap:3rem;margin-bottom:2rem;}
+.foot-links a{font-family:'Caveat',cursive;font-size:1.1rem;color:rgba(232,224,208,0.4);text-decoration:none;transition:color 0.2s;}
+.foot-links a:hover{color:var(--paper3);}
+.foot-copy{font-family:'Special Elite',monospace;font-size:0.52rem;letter-spacing:0.25em;text-transform:uppercase;color:rgba(232,224,208,0.2);}
+
+.reveal{opacity:0;transform:translateY(16px);transition:opacity 0.85s cubic-bezier(0.22,1,0.36,1),transform 0.85s cubic-bezier(0.22,1,0.36,1);}
+.reveal.vis{opacity:1;transform:none;}
+</style>
+</head>
+<body>
+
+<input type="file" id="master-file-input" accept="image/*" style="display:none;">
+
+<nav>
+  <a class="logo" href="anemone-photo.html">Anemone <em>Photo</em></a>
+  <ul class="nav-links">
+    <li><a href="portfolio.html">Portfolio</a></li>
+    <li><a href="journal.html">Journal</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+  <button class="nav-edit-btn" id="editToggle">&#9998; Edit Page</button>
+</nav>
+
+<div class="edit-toolbar" id="editToolbar" style="display:none;">
+  <span class="toolbar-label">Editing mode on</span>
+  <button onclick="saveAll()">Save Changes</button>
+  <button onclick="clearSaved()">Clear Saved</button>
+  <button class="primary" onclick="toggleEdit()">Done</button>
+</div>
+
+<section class="cover">
+  <div class="coffee cs1"></div>
+  <div class="coffee cs2"></div>
+  <div class="coffee cs3"></div>
+  <div class="washi washi-1"></div>
+  <div class="washi washi-2"></div>
+
+  <div class="cover-top">
+    <div style="display:flex;flex-direction:column;gap:0.8rem;">
+      <span class="stamp stamp-red" contenteditable="false" data-key="stamp1">Field Journal No. 7</span>
+      <span style="font-family:'Caveat',cursive;font-size:0.85rem;color:var(--faded);margin-left:0.5rem;" contenteditable="false" data-key="stamp-sub">— started somewhere over the Atlantic</span>
+    </div>
+    <div style="margin-right:46%;">
+      <span class="stamp stamp-blue" contenteditable="false" data-key="stamp2">2024 — Present</span>
+    </div>
+  </div>
+
+  <div class="photo-cluster">
+    <div class="film-print fp1" onclick="uploadPhoto(this)">
+      <div class="fp-tape"></div>
+      <div class="fp-image">
+        <div class="fp-placeholder">
+          <svg viewBox="0 0 24 24" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          <span>Click to add photo</span>
+        </div>
+      </div>
+      <div class="fp-curl"></div>
+      <div class="fp-number" contenteditable="false" data-key="fp1-num">&#9632; 12A &middot; KODAK PORTRA 400</div>
+    </div>
+    <div class="film-print fp2" onclick="uploadPhoto(this)">
+      <div class="fp-pin"></div>
+      <div class="fp-image">
+        <div class="fp-placeholder">
+          <svg viewBox="0 0 24 24" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          <span>Click to add photo</span>
+        </div>
+      </div>
+      <div class="fp-curl"></div>
+      <div class="fp-number" contenteditable="false" data-key="fp2-num">&#9632; 7 &middot; ILFORD HP5</div>
+    </div>
+    <div class="film-print fp3" onclick="uploadPhoto(this)">
+      <div class="fp-tape"></div>
+      <div class="fp-image">
+        <div class="fp-placeholder">
+          <svg viewBox="0 0 24 24" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          <span>Click to add photo</span>
+        </div>
+      </div>
+      <div class="fp-curl"></div>
+      <div class="fp-number" contenteditable="false" data-key="fp3-num">&#9632; 22 &middot; KODAK TRI-X</div>
+    </div>
+    <div class="film-print fp4" onclick="uploadPhoto(this)">
+      <div class="fp-image">
+        <div class="fp-placeholder">
+          <svg viewBox="0 0 24 24" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          <span>Click to add photo</span>
+        </div>
+      </div>
+      <div class="fp-curl"></div>
+      <div class="fp-number" contenteditable="false" data-key="fp4-num">&#9632; 5B &middot; FUJI 400H</div>
+    </div>
+  </div>
+
+  <div class="cover-title">
+    <div class="journal-no" contenteditable="false" data-key="journal-no">Field Journal &middot; Travel Photography</div>
+    <h1 class="cover-h1">Ane<span class="scratch" contenteditable="false" data-key="title-scratch">mone</span><br>Photo</h1>
+    <div class="cover-subtitle" contenteditable="false" data-key="cover-subtitle">wandering the world's edge</div>
+  </div>
+
+  <div class="cover-info">
+    <div class="info-block">
+      <div class="info-label" contenteditable="false" data-key="lbl-photographer">Photographer</div>
+      <div class="info-val" contenteditable="false" data-key="info-photographer">Tommy Cahill</div>
+    </div>
+    <div class="info-block">
+      <div class="info-label" contenteditable="false" data-key="lbl-regions">Regions</div>
+      <div class="info-val" contenteditable="false" data-key="info-regions">Arabian Peninsula &middot; SE Asia &middot; Eastern Asia &middot; Andes &middot; NYC &middot; T&uuml;rkiye</div>
+    </div>
+    <div class="info-block">
+      <div class="info-label" contenteditable="false" data-key="lbl-format">Format</div>
+      <div class="info-val" contenteditable="false" data-key="info-format">35mm / Digital</div>
+    </div>
+    <div class="info-block">
+      <div class="info-label" contenteditable="false" data-key="lbl-period">Period</div>
+      <div class="info-val" contenteditable="false" data-key="info-period">2024 &ndash; Present</div>
+    </div>
+  </div>
+</section>
+
+<div class="torn torn-top"></div>
+
+<div class="dark-section">
+  <div class="ds-label reveal" contenteditable="false" data-key="ds-label">Selected Frames</div>
+  <div class="ds-title reveal" contenteditable="false" data-key="ds-title">The <em>Portfolio</em></div>
+  <div class="photo-grid reveal">
+    <div class="gprint gp1">
+      <div class="gp-tape"></div>
+      <div class="gp-img-wrap" onclick="uploadPhoto(this)">
+        <div class="gp-placeholder"><svg viewBox="0 0 24 24" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><span>Click to add photo</span></div>
+      </div>
+      <div class="gp-num" contenteditable="false" data-key="gp1-num">&#9632; 14 &middot; KODAK PORTRA 400 &middot; f/8 &middot; 1/125</div>
+      <div class="gp-caption" contenteditable="false" data-key="gp1-cap">Andes &mdash; Dawn Crossing</div>
+      <div class="gp-curl"></div>
+    </div>
+    <div class="gprint gp2">
+      <div class="gp-tape"></div>
+      <div class="gp-img-wrap" onclick="uploadPhoto(this)">
+        <div class="gp-placeholder"><svg viewBox="0 0 24 24" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><span>Click to add photo</span></div>
+      </div>
+      <div class="gp-num" contenteditable="false" data-key="gp2-num">&#9632; 7A &middot; ILFORD HP5 &middot; f/5.6</div>
+      <div class="gp-caption" contenteditable="false" data-key="gp2-cap">Istanbul &mdash; Bosphorus</div>
+      <div class="gp-curl"></div>
+    </div>
+    <div class="gprint gp3">
+      <div class="gp-img-wrap" onclick="uploadPhoto(this)">
+        <div class="gp-placeholder"><svg viewBox="0 0 24 24" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><span>Click to add photo</span></div>
+      </div>
+      <div class="gp-num" contenteditable="false" data-key="gp3-num">&#9632; 31 &middot; KODAK TRI-X &middot; pushed +2</div>
+      <div class="gp-caption" contenteditable="false" data-key="gp3-cap">SE Asia &mdash; Monsoon Season</div>
+      <div class="gp-curl"></div>
+    </div>
+    <div class="gprint gp4">
+      <div class="gp-tape"></div>
+      <div class="gp-img-wrap" onclick="uploadPhoto(this)">
+        <div class="gp-placeholder"><svg viewBox="0 0 24 24" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><span>Click to add photo</span></div>
+      </div>
+      <div class="gp-num" contenteditable="false" data-key="gp4-num">&#9632; 2B &middot; FUJI 400H</div>
+      <div class="gp-caption" contenteditable="false" data-key="gp4-cap">Arabian Peninsula</div>
+      <div class="gp-curl"></div>
+    </div>
+    <div class="gprint gp5">
+      <div class="gp-tape"></div>
+      <div class="gp-img-wrap" onclick="uploadPhoto(this)">
+        <div class="gp-placeholder"><svg viewBox="0 0 24 24" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><span>Click to add photo</span></div>
+      </div>
+      <div class="gp-num" contenteditable="false" data-key="gp5-num">&#9632; 19 &middot; ILFORD DELTA 100</div>
+      <div class="gp-caption" contenteditable="false" data-key="gp5-cap">New York &mdash; Lower Manhattan</div>
+      <div class="gp-curl"></div>
+    </div>
+  </div>
+  <div class="ds-portfolio-link"><a href="portfolio.html">View Full Portfolio &rarr;</a></div>
+</div>
+
+<div class="torn torn-bottom"></div>
+
+<div class="journal-page">
+  <div class="washi" style="top:1.5rem;left:200px;width:80px;background:rgba(139,34,34,0.15);transform:rotate(-4deg);"></div>
+  <div class="entry reveal">
+    <div class="entry-date" contenteditable="false" data-key="entry-date">Day 12 &mdash; Somewhere above the treeline, Iceland</div>
+    <h2 class="entry-hed" contenteditable="false" data-key="entry-hed">Fallen<br><em>Light</em></h2>
+    <div style="width:50px;height:3px;background:var(--red);margin:1rem 0 1.2rem;"></div>
+    <p class="entry-body" contenteditable="false" data-key="entry-body">Seventeen days along the Arctic coastline. The light here doesn't rise or fall the way light should — it drags, slides, lingers on the horizon like it can't quite commit to leaving. The kind of light that makes you stop walking and just stand there, cold, not caring.<br><br>I shot three rolls before breakfast. None of them will be any good. That's okay. Some things you shoot just to prove you were there.</p>
+    <div class="margin-note" style="top:4rem;" contenteditable="false" data-key="margin-note">note to self — bring more film next time. obviously.</div>
+  </div>
+  <div class="stamps-row reveal">
+    <div class="pstamp ps-red" style="--rot:-6deg;"><div class="ps-country" contenteditable="false" data-key="s1">T&uuml;rkiye<br>Istanbul</div><div class="ps-date" contenteditable="false" data-key="s1d">Jan 2025</div></div>
+    <div class="pstamp ps-blue" style="--rot:4deg;"><div class="ps-country" contenteditable="false" data-key="s2">Thailand<br>Bangkok</div><div class="ps-date" contenteditable="false" data-key="s2d">Mar 2024</div></div>
+    <div class="pstamp ps-olive" style="--rot:-3deg;"><div class="ps-country" contenteditable="false" data-key="s3">Saudi<br>Arabia</div><div class="ps-date" contenteditable="false" data-key="s3d">Feb 2025</div></div>
+    <div class="pstamp ps-red" style="--rot:7deg;"><div class="ps-country" contenteditable="false" data-key="s4">Japan<br>Tokyo</div><div class="ps-date" contenteditable="false" data-key="s4d">Nov 2024</div></div>
+    <div class="pstamp ps-blue" style="--rot:-5deg;"><div class="ps-country" contenteditable="false" data-key="s5">Peru<br>Cusco</div><div class="ps-date" contenteditable="false" data-key="s5d">Apr 2025</div></div>
+  </div>
+</div>
+
+<div class="contact-page" id="contact">
+  <div class="contact-inner reveal">
+    <div class="entry-date" contenteditable="false" data-key="contact-label">Get in Touch</div>
+    <h2 class="contact-h" contenteditable="false" data-key="contact-h">Contact<br><em>Tommy</em></h2>
+    <div class="contact-rule"></div>
+    <div class="contact-lines">
+      <div class="contact-line">
+        <span class="cl-label" contenteditable="false" data-key="cl1">Email</span>
+        <span class="cl-val" id="contact-email-val"></span>
+      </div>
+      <div class="contact-line">
+        <span class="cl-label" contenteditable="false" data-key="cl2">Phone</span>
+        <span class="cl-val" contenteditable="false" data-key="contact-phone">+1-815-922-7257</span>
+      </div>
+      <div class="contact-line">
+        <span class="cl-label" contenteditable="false" data-key="cl3">Instagram</span>
+        <span class="cl-val" contenteditable="false" data-key="contact-ig">@tommy_.cahill</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="foot-top">
+    <div class="foot-brand" contenteditable="false" data-key="foot-brand">Ane<em>mone</em><br>Photo</div>
+    <div class="foot-scrawl" contenteditable="false" data-key="foot-scrawl">Tommy Cahill<br>2024 &ndash; Present</div>
+  </div>
+  <div class="foot-links">
+    <a href="portfolio.html">Portfolio</a>
+    <a href="journal.html">Journal</a>
+    <a href="contact.html">Contact</a>
+  </div>
+  <div class="foot-copy" contenteditable="false" data-key="foot-copy">&copy; 2025 Tommy Cahill &middot; Anemone Photo</div>
+</footer>
+
+<script>
+/* build email link via JS to avoid Cloudflare obfuscation */
+(function(){
+  var u='tommycahill02';var d='gmail.com';
+  var el=document.getElementById('contact-email-val');
+  if(el){
+    var a=document.createElement('a');
+    a.href='mai'+'lto:'+u+'@'+d;
+    a.textContent=u+'@'+d;
+    a.style.cssText='color:var(--ink);text-decoration:none;border-bottom:1px solid rgba(139,34,34,0.3);';
+    el.appendChild(a);
+  }
+})();
+
+const PAGE='main';
+let editMode=false;
+
+function toggleEdit(){
+  editMode=!editMode;
+  document.body.classList.toggle('edit-mode',editMode);
+  document.getElementById('editToggle').classList.toggle('on',editMode);
+  document.getElementById('editToolbar').style.display=editMode?'flex':'none';
+  document.getElementById('editToggle').textContent=editMode?'Editing...':'&#9998; Edit Page';
+  document.querySelectorAll('[contenteditable]').forEach(el=>{el.contentEditable=editMode?'true':'false';});
+}
+document.getElementById('editToggle').addEventListener('click',toggleEdit);
+
+function saveAll(){
+  document.querySelectorAll('[data-key]').forEach(el=>{
+    try{localStorage.setItem(PAGE+'_'+el.dataset.key,el.innerHTML);}catch(e){}
+  });
+  const btn=document.querySelector('.edit-toolbar button');
+  btn.textContent='Saved ✓';setTimeout(()=>btn.textContent='Save Changes',1500);
+}
+function restoreAll(){
+  document.querySelectorAll('[data-key]').forEach(el=>{
+    const s=localStorage.getItem(PAGE+'_'+el.dataset.key);
+    if(s!==null)el.innerHTML=s;
+  });
+}
+function clearSaved(){
+  if(!confirm('Clear all saved changes?'))return;
+  document.querySelectorAll('[data-key]').forEach(el=>{localStorage.removeItem(PAGE+'_'+el.dataset.key);});
+  location.reload();
+}
+
+let currentTarget=null;
+function uploadPhoto(container){
+  if(!editMode){alert('Enable edit mode first to add photos.');return;}
+  currentTarget=container;
+  const input=document.getElementById('master-file-input');
+  input.value='';
+  input.onchange=function(){
+    if(!this.files[0])return;
+    const reader=new FileReader();
+    reader.onload=function(e){
+      const src=e.target.result;
+      const wrap=currentTarget.classList.contains('gp-img-wrap')||currentTarget.classList.contains('fp-image')?currentTarget:currentTarget.querySelector('.gp-img-wrap,.fp-image');
+      if(!wrap)return;
+      wrap.innerHTML='<img src="'+src+'" style="width:100%;height:100%;object-fit:cover;display:block;" alt="">';
+      const key=wrap.dataset.photoKey;
+      if(key){try{localStorage.setItem(PAGE+'_photo_'+key,src);}catch(e){console.warn('Image too large');}}
+    };
+    reader.readAsDataURL(this.files[0]);
+  };
+  input.click();
+}
+
+document.querySelectorAll('.gp-img-wrap,.fp-image').forEach((el,i)=>{
+  el.dataset.photoKey='slot'+i;
+  const parent=el.closest('.gprint,.film-print');
+  if(parent)parent.dataset.photoKey='slot'+i;
+});
+
+function restorePhotos(){
+  document.querySelectorAll('.gp-img-wrap,.fp-image').forEach(wrap=>{
+    const key=wrap.dataset.photoKey;
+    if(!key)return;
+    const src=localStorage.getItem(PAGE+'_photo_'+key);
+    if(src)wrap.innerHTML='<img src="'+src+'" style="width:100%;height:100%;object-fit:cover;display:block;" alt="">';
+  });
+}
+
+restoreAll();restorePhotos();
+
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('vis');obs.unobserve(e.target);}});},{threshold:0.07});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
