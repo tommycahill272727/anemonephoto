@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact — Anemone Photo</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Oswald:wght@700&family=Lora:ital,wght@0,400;1,400;1,600&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --paper:#e8dfc8;--paper2:#dfd5b8;--paper3:#f2ebe0;--aged:#c9bc9e;
+  --ink:#1c1510;--ink2:#2e261a;--faded:#7a6e5a;
+  --red:#8b2222;--red2:#a33030;
+}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--paper3);color:var(--ink);font-family:'Lora',serif;
+  overflow-x:hidden;min-height:100vh;
+  background-image:repeating-linear-gradient(transparent,transparent 31px,rgba(160,140,100,0.18) 31px,rgba(160,140,100,0.18) 32px);
+  background-size:100% 32px;
+}
+body::before{
+  content:'';position:fixed;inset:0;z-index:9998;pointer-events:none;opacity:0.06;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:512px;
+}
+
+/* NAV */
+nav{
+  position:sticky;top:0;z-index:1000;
+  background:var(--ink2);padding:0.8rem 2rem;
+  display:flex;justify-content:space-between;align-items:center;
+  border-bottom:3px solid var(--red);
+}
+.logo{font-family:'Oswald',sans-serif;font-weight:700;font-size:1.05rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--paper3);text-decoration:none;}
+.logo em{color:var(--red2);font-style:normal;}
+.nav-links{display:flex;gap:2.5rem;list-style:none;}
+.nav-links a{font-family:'Caveat',cursive;font-size:1.05rem;color:var(--aged);text-decoration:none;transition:color 0.2s;}
+.nav-links a:hover,.nav-links a.cur{color:var(--paper3);}
+
+/* PAGE HEADER */
+.contact-header{
+  background:var(--ink);
+  padding:4rem 3rem 3.5rem 100px;
+  position:relative;
+  border-bottom:3px solid var(--red);
+}
+.contact-header::after{content:'';position:absolute;top:0;bottom:0;left:88px;width:2px;background:rgba(139,34,34,0.2);pointer-events:none;}
+.contact-header::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:0.04;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:512px;}
+.ch-inner{position:relative;z-index:1;}
+.ch-label{font-family:'Special Elite',monospace;font-size:0.58rem;letter-spacing:0.45em;text-transform:uppercase;color:rgba(232,224,208,0.35);margin-bottom:0.5rem;}
+.ch-title{font-family:'Oswald',sans-serif;font-weight:700;font-size:clamp(3rem,7vw,6rem);line-height:0.85;text-transform:uppercase;letter-spacing:0.03em;color:var(--paper3);}
+.ch-title em{color:var(--red2);font-style:normal;}
+.ch-rule{width:60px;height:3px;background:var(--red);margin:1.2rem 0 1rem;}
+.ch-sub{font-family:'Caveat',cursive;font-size:1.1rem;color:rgba(232,224,208,0.4);}
+
+/* CONTACT BODY */
+.contact-body{
+  max-width:780px;
+  padding:5rem 3rem 5rem 100px;
+  position:relative;
+}
+.contact-body::before{
+  content:'';position:absolute;top:0;bottom:0;left:88px;
+  width:2px;background:rgba(139,34,34,0.2);pointer-events:none;
+}
+
+/* coffee stain */
+.coffee{position:absolute;border-radius:50%;pointer-events:none;background:radial-gradient(ellipse at 40% 40%,rgba(90,55,20,0.09),rgba(90,55,20,0.04) 45%,transparent 70%);border:1px solid rgba(90,55,20,0.07);}
+
+/* stamp */
+.stamp{
+  display:inline-block;border:2.5px solid;
+  padding:0.4rem 0.8rem;
+  font-family:'Special Elite',monospace;font-size:0.6rem;letter-spacing:0.3em;text-transform:uppercase;
+  transform:rotate(-3deg);margin-bottom:2.5rem;display:block;width:fit-content;
+}
+.stamp-red{color:rgba(139,34,34,0.7);border-color:rgba(139,34,34,0.7);}
+
+/* contact lines */
+.contact-lines{display:flex;flex-direction:column;gap:0;position:relative;z-index:1;}
+
+.contact-line{
+  display:flex;align-items:stretch;
+  border-bottom:1px solid rgba(160,140,100,0.2);
+  padding:1.8rem 0;
+  gap:2rem;
+}
+.contact-line:first-child{border-top:1px solid rgba(160,140,100,0.2);}
+
+.cl-label{
+  font-family:'Special Elite',monospace;font-size:0.55rem;
+  letter-spacing:0.35em;text-transform:uppercase;
+  color:var(--faded);min-width:100px;padding-top:0.35rem;
+}
+
+.cl-content{display:flex;flex-direction:column;gap:0.3rem;}
+
+.cl-val{
+  font-family:'Caveat',cursive;font-size:1.5rem;
+  color:var(--ink);line-height:1.2;
+}
+.cl-val a{color:var(--ink);text-decoration:none;border-bottom:1px solid rgba(139,34,34,0.25);transition:border-color 0.2s;}
+.cl-val a:hover{border-color:var(--red);}
+
+.cl-note{
+  font-family:'Lora',serif;font-style:italic;
+  font-size:0.82rem;color:var(--faded);line-height:1.5;
+}
+
+/* scrawled aside */
+.scrawl{
+  font-family:'Caveat',cursive;font-size:0.9rem;
+  color:var(--faded);transform:rotate(1.5deg);
+  display:inline-block;margin-top:3rem;
+  border-left:2px solid rgba(139,34,34,0.2);
+  padding-left:0.8rem;line-height:1.6;
+  position:relative;z-index:1;
+}
+
+/* washi tape */
+.washi{position:absolute;height:20px;transform-origin:center;pointer-events:none;}
+
+/* FOOTER */
+footer{
+  background:var(--ink2);border-top:3px solid var(--red);
+  padding:2rem 3rem 2rem 100px;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.foot-brand{font-family:'Oswald',sans-serif;font-weight:700;font-size:1.3rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--paper3);}
+.foot-brand em{color:var(--red2);font-style:normal;}
+.foot-links{display:flex;gap:2.5rem;}
+.foot-links a{font-family:'Caveat',cursive;font-size:1rem;color:var(--aged);text-decoration:none;transition:color 0.2s;}
+.foot-links a:hover{color:var(--paper3);}
+.foot-copy{font-family:'Special Elite',monospace;font-size:0.48rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(232,224,208,0.2);}
+
+.reveal{opacity:0;transform:translateY(14px);transition:opacity 0.8s cubic-bezier(0.22,1,0.36,1),transform 0.8s cubic-bezier(0.22,1,0.36,1);}
+.reveal.vis{opacity:1;transform:none;}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="index.html">Anemone <em>Photo</em></a>
+  <ul class="nav-links">
+    <li><a href="portfolio.html">Portfolio</a></li>
+    <li><a href="journal.html">Journal</a></li>
+    <li><a href="contact.html" class="cur">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HEADER -->
+<div class="contact-header">
+  <div class="ch-inner">
+    <div class="ch-label">Tommy Cahill &middot; Anemone Photo</div>
+    <h1 class="ch-title">Get in<br><em>Touch</em></h1>
+    <div class="ch-rule"></div>
+    <p class="ch-sub">Always open to collaborations, print requests, or just a good conversation about travel.</p>
+  </div>
+</div>
+
+<!-- BODY -->
+<div class="contact-body">
+
+  <!-- coffee stain -->
+  <div class="coffee" style="top:3rem;right:2rem;width:110px;height:100px;"></div>
+
+  <!-- washi tape -->
+  <div class="washi" style="top:2rem;left:120px;width:90px;background:rgba(100,130,80,0.18);border-top:1px solid rgba(100,130,80,0.28);border-bottom:1px solid rgba(100,130,80,0.28);transform:rotate(4deg);"></div>
+
+  <div class="stamp stamp-red reveal">Available for assignment &nbsp;&middot;&nbsp; 2025</div>
+
+  <div class="contact-lines">
+
+    <div class="contact-line reveal">
+      <span class="cl-label">Email</span>
+      <div class="cl-content">
+        <span class="cl-val" id="email-val"></span>
+        <span class="cl-note">Best way to reach me. Usually respond within 24 hours.</span>
+      </div>
+    </div>
+
+    <div class="contact-line reveal">
+      <span class="cl-label">Phone</span>
+      <div class="cl-content">
+        <span class="cl-val"><a href="tel:+18159227257">+1-815-922-7257</a></span>
+        <span class="cl-note">US Central time. Text works too.</span>
+      </div>
+    </div>
+
+    <div class="contact-line reveal">
+      <span class="cl-label">Instagram</span>
+      <div class="cl-content">
+        <span class="cl-val"><a href="https://instagram.com/tommy_.cahill" target="_blank">@tommy_.cahill</a></span>
+        <span class="cl-note">Behind-the-scenes, recent work, and the occasional bad idea.</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="scrawl reveal">
+    Based in Chicago &nbsp;&middot;&nbsp; Available worldwide<br>
+    Shooting since 2020 &nbsp;&middot;&nbsp; Mostly film
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <span class="foot-brand">Ane<em>mone</em> Photo</span>
+  <div class="foot-links">
+    <a href="index.html">Home</a>
+    <a href="portfolio.html">Portfolio</a>
+    <a href="journal.html">Journal</a>
+  </div>
+  <span class="foot-copy">&copy; 2025 Tommy Cahill &middot; All rights reserved</span>
+</footer>
+
+<script>
+/* build email without exposing it to scrapers */
+(function(){
+  var u='tommycahill02', d='gmail.com';
+  var el=document.getElementById('email-val');
+  if(el){
+    var a=document.createElement('a');
+    a.href='mai'+'lto:'+u+'@'+d;
+    a.textContent=u+'@'+d;
+    a.style.cssText='color:var(--ink);text-decoration:none;border-bottom:1px solid rgba(139,34,34,0.25);';
+    el.appendChild(a);
+  }
+})();
+
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('vis');obs.unobserve(e.target);}});
+},{threshold:0.08});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
